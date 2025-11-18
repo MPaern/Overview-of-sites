@@ -1,0 +1,519 @@
+
+# this project is made to get an overview of the data from all sites
+# information that has to be included in the data folder: 
+
+
+
+
+# setup -------------------------------------------------------------------
+# libraries used in this project
+library(tidyverse)
+library(ggplot2)
+library(dplyr)
+library(suncalc)
+library(suntools)
+library(lubridate)
+library(readr)
+library(esquisse)
+library(MetBrewer)
+library(purrr)
+library(sp)
+library(sf)
+library(hms)
+#library(maptools)
+# library(ggcorrplot)
+
+
+# read data in ------------------------------------------------------------
+
+deployment <-  read_csv("data/survey_deployment.csv")
+maintenance <-  read_csv("data/survey_maintenance.csv")
+overview_data <-  read_csv("data/overview_table.csv")
+
+
+# days deployed -----------------------------------------------------------
+class(deployment$`Date and Time Deployed`)
+class(maintenance$`Date and Time`)
+
+deployment$`Date and Time Deployed` <- as.POSIXct(deployment$`Date and Time Deployed`, format="%m/%d/%Y %H:%M:%S %p")
+
+
+maintenance$`Date and Time` <- parse_date_time(maintenance$`Date and Time`, 
+                                               orders = c("m/d/Y I:M:S p", "m/d/Y H:M"))
+  
+maintenance$dateretrieved <- ifelse(grepl("etri", maintenance$Comments), maintenance$`Date and Time`, NA)
+
+maintenance$dateretrieved <- as.POSIXct(maintenance$dateretrieved, origin="1970-01-01")
+
+unique_maintenance <- unique(maintenance[, c("Site Name", "dateretrieved")])
+
+unique_maintenance <- na.omit(unique_maintenance)
+
+deployment <- merge(
+  deployment,
+  unique_maintenance,
+  by = "Site Name",
+  all = TRUE
+)
+
+#calculate days between deployment and retrieval
+
+  
+overview_data$`days deployed`<- difftime(deployment$dateretrieved, deployment$`Date and Time Deployed`, units = c("days"))
+
+
+# distance from water, date and time deployed -----------------------------------------------------
+
+overview_data$`distance from water` <- deployment$`Distance from detector to closest water body (m)`[match(overview_data$Location, deployment$`Site Name`)]
+overview_data$`date deployed` <- deployment$`Date and Time Deployed`[match(overview_data$Location, deployment$`Site Name`)]
+overview_data$`date retrieved` <- deployment$dateretrieved[match(overview_data$Location, deployment$`Site Name`)]
+
+# Make directories of all the sites and the id files -----------
+
+# Define the source and destination directories # computer shut down randomly, real codechunck did not survive
+source_dir <- "P:/SW_CoastalMonitoring/Data_collection_2024"
+destination_dir <- "data/IDfiles"
+
+# Get a list of all 50 site folders in source_dir
+site_folders <- list.dirs(source_dir, recursive = FALSE)
+
+#########Don't run this 
+
+# Loop through each site folder
+for (site in site_folders) {
+  
+  # Extract folder name
+  site_name <- basename(site)
+  
+  # Find all "id.csv" files within this folder (including subdirectories)
+  csv_files <- list.files(site, pattern = "id\\.csv$", recursive = TRUE, full.names = TRUE)
+  
+  # Read and merge all CSVs if there are any
+  if (length(csv_files) > 0) {
+    merged_data <- bind_rows(lapply(csv_files, read_csv))  # Efficient merging
+    
+    # Create a corresponding site folder in "data"
+    site_output_folder <- file.path(destination_dir, site_name)
+    if (!dir.exists(site_output_folder)) dir.create(site_output_folder, recursive = TRUE)
+    
+    # Save merged file
+    write_csv(merged_data, file.path(site_output_folder, "all_id.csv"))
+  }
+}
+
+print("Merging complete!")
+
+
+
+# Vigadeparandus ----------------------------------------------------------
+
+# df <- list.files(path='data/IDfiles/CM-11', full.names = TRUE) %>% 
+#   lapply(read_csv) %>% 
+#   bind_rows
+# df <- df[-c(45)]
+# write.csv(df, "data/IDfiles/CM-11/all_id.csv", row.names = FALSE)
+# input <- read.csv("data/IDfiles/CM-11/all_id.csv")
+# 
+# df <- read.csv("data/IDfiles/CM-43/all_id.csv")
+# df <- df[-c(1)]
+# df <- df %>% 
+#   rename(
+#     'AUTO ID*' = "AUTO.ID.",
+#     'DATE-12' = "DATE.12",
+#     'HOUR-12' = "HOUR.12",
+#     'TIME-12' = "TIME.12")
+# write.csv(df, "data/IDfiles/CM-43/all_id.csv", row.names = FALSE)
+# input <- read.csv("data/IDfiles/CM-43/all_id.csv")
+
+#29
+# csv_files <- list.files("P:/SW_CoastalMonitoring/Data_collection_2024/CM-29", pattern = "id\\.csv$", recursive = TRUE, full.names = TRUE)
+# if (length(csv_files) > 0) {
+#   merged_data <- bind_rows(lapply(csv_files, read_csv))  # Efficient merging
+# 
+#   # Save merged file
+#   write_csv(merged_data, file.path("data/IDfiles/CM-29", "all_id.csv"))
+# }
+# 
+# print("Merging complete!")
+
+
+# read in in all the data --------------------------------------------------------------
+
+site_folders <- list.dirs("data/IDfiles", recursive = FALSE)
+idfiles_dir <- "data/IDfiles"
+
+# Loop through each site folder
+for (site in site_folders) {
+  
+  # Extract site name
+  site_name <- basename(site)
+  
+  # Remove hyphen for variable naming
+  site_name_clean <- str_replace_all(site_name, "-", "")
+  
+  # Construct file path using site_name
+  csv_file <- file.path(idfiles_dir, site_name, "all_id.csv")
+  
+  # Check if file exists before trying to read
+  if (file.exists(csv_file)) {
+    # Read the CSV file
+    input_data <- read_csv(csv_file)
+    
+    # Dynamically assign it to a variable
+    assign(paste0("input", site_name_clean), input_data, envir = .GlobalEnv)
+    
+    print(paste("Loaded:", paste0("input", site_name_clean)))
+  } else {
+    print(paste("No CSV found for:", site_name))
+  }
+}
+
+
+# how much data do I have?  ------------------------------------------------------------
+
+# List all site names
+site_names <- sprintf("inputCM%02d", 1:50)
+
+
+# Initialize row sum
+total_rows <- 0
+
+# Loop through each data frame
+for (site_var in site_names) {
+  if (exists(site_var)) {  # Check if the dataframe exists
+    total_rows <- total_rows + nrow(get(site_var))  # Add row count
+  } else {
+    print(paste("Missing:", site_var))
+  }
+}
+
+# Print total row count
+print(paste("Total number of rows across all datasets:", total_rows))
+
+
+# all into 1 file --------------------------------------------------------------
+
+#make column with site name 
+for (i in 1:50) {
+  
+  # Generate site variable name dynamically
+  site_var <- sprintf("inputCM%02d", i)  # inputCM01, inputCM02, ..., inputCM50
+  site_name <- sprintf("CM-%02d", i)  # CM-01, CM-02, ..., CM-50
+  
+  if (exists(site_var)) {  # Check if dataframe exists
+    temp_data <- get(site_var)  # Retrieve dataframe
+    temp_data$Site <- site_name  # Add new column with site name
+    
+    assign(site_var, temp_data, envir = .GlobalEnv)  # Save back to original variable
+  } else {
+    print(paste("Missing:", site_var))  # Debugging message
+  }
+}
+
+
+# all into cm
+
+# Retrieve and combine all existing dataframes
+all_sites_data <- lapply(site_names, function(site_var) {
+  if (exists(site_var)) {
+    get(site_var)  # Retrieve dataframe
+  } 
+})
+
+# Bind all dataframes into one large dataframe
+cm <- bind_rows(all_sites_data)
+
+# Check the final merged dataframe
+dim(cm)  # Should return (3503006 this is 3773 rows more than I got with a dataset that has no merging problems - 3499216, 45) where X includes the new "Site" column
+#run on 05.03 3499233
+head(cm)
+
+
+
+# make table neat ---------------------------------------------------------
+
+cm <- cm %>% 
+  rename(
+    filename = "OUT FILE FS",
+    autoid = "AUTO ID*",
+    DATE.12 = 'DATE-12',
+    HOUR.12 = 'HOUR-12',
+    TIME.12 = 'TIME-12') %>% 
+  mutate(autoid = factor(autoid)) %>% 
+  dplyr::select(FOLDER, filename, DURATION, 
+                DATE, TIME, HOUR,
+                DATE.12, TIME.12, HOUR.12,
+                autoid, Site
+  )
+
+
+# noise -------------------------------------------------------------------
+
+barnoise <- ggplot(cm) + 
+  geom_bar(aes(x= Site, fill = autoid), position = "fill") +
+  scale_fill_manual(name = "AutoID", values = met.brewer("Signac", n = 13)) + 
+  ylab("Proportion of recordings") + 
+  xlab("Site") +
+  theme(text = element_text(size = 10)) 
+
+barnoise
+
+
+# remove tests, by location: date deployed and date retrieved?
+
+cm <- cm %>% 
+  filter(DATE >= as.POSIXct("2024-06-14"))
+
+cm <- cm %>% 
+  mutate(DATE = replace(DATE, Site == "CM-39" & DATE > as.POSIXct("2024-10-10"), NA_POSIXct_)) %>% 
+  filter(!is.na(DATE))
+
+write.csv(cm, "cm_all.csv")
+
+#read
+
+cm <- read.csv("cm_all.csv")
+
+
+# recording period
+
+ggplot(cm) + 
+  geom_bin2d(aes(x = DATE.12, y = Site), bins = 100) +  # Adjust bins for detail
+  scale_fill_viridis_c() +  # Better color scale for density
+  xlab("Date in season") + ylab(" ") +
+  ggtitle("Recording activity") + 
+  theme_minimal()
+
+
+# gaps in dataset ---------------------------------------------------------
+# DATE.12 is the start of the night eg. the start date. 
+
+# Step 1: Generate a complete sequence of dates for each site from deployment
+complete_dates <- deployment %>% 
+  mutate(
+    BeginDate = as.Date(`Date and Time Deployed`),
+    EndDate   = as.Date(`dateretrieved`) - 1,
+    full_dates = map2(BeginDate, EndDate, ~ seq.Date(from = .x, to = .y, by = "day"))
+  ) %>%
+  select(`Site Name`, full_dates) %>%
+  unnest(full_dates) %>%
+  rename(ExpectedDate = full_dates)
+
+# Step 2: Get the actual available dates from cm by site
+available_dates <- cm %>%
+  reframe(ActualDate = unique(DATE.12), .by = "Site")
+
+# Step 3: For each site, find the dates that are expected but missing in the actual data
+complete_dates <- complete_dates %>%
+rename(Site = `Site Name`)
+
+missing_dates <- complete_dates %>%
+  anti_join(available_dates, by = c("Site", "ExpectedDate" = "ActualDate"))
+
+# View missing dates by site
+
+ggplot(missing_dates) + 
+  geom_point(aes(x = ExpectedDate, y = Site)) +  
+  scale_fill_viridis_c() + 
+  xlab("Date in season") + ylab(" ") +
+  ggtitle("Missing dates") + 
+  theme_minimal()
+
+#write.csv(missing_dates, "Missing dates v5.csv")
+
+
+
+
+
+
+
+# daytime noise -----------------------------------------------------------
+# make new df with sunrise and sunset times 
+cm_sun <- cm
+
+cm_sun <- cm_sun |> 
+  dplyr::select(FOLDER, filename, 
+                DATE, TIME,
+                autoid, Site
+  )
+cm_sun$DATE = as.POSIXct(cm_sun$DATE, format= "%Y-%m-%d")
+
+  
+# read in df with locations
+location <-  read_csv("data/locations.csv")
+location$Z <- NULL
+location <- location |> 
+  rename(
+    Site = "Name"
+  )
+
+location_sf <- st_as_sf(location, coords = c("X", "Y"), crs = 4326)
+
+
+# add location to table
+
+cm_sun <- merge(cm_sun, location_sf, by = "Site")
+cm_sun<- cm_sun |> 
+  rename(
+    location = "geometry"
+  )
+cm_sun$location <- st_as_sf(cm_sun$location)
+# names(cm_sun)[7] <- "location"
+
+# calculate sunrise and sunset for each day
+
+cm_sun$sunrise <- sunriset(cm_sun$location, cm_sun$DATE, direction = "sunrise", POSIXct.out = TRUE)$time
+cm_sun$sunset <- sunriset(cm_sun$location, cm_sun$DATE, direction = "sunset", POSIXct.out = TRUE)$time
+
+# correct timezone
+
+cm_sun$sunrise <- with_tz(cm_sun$sunrise, "Europe/Oslo")
+cm_sun$sunset <- with_tz(cm_sun$sunset, "Europe/Oslo")
+
+# add that to the cm by date? like sunrisetime and sunsettime and then make a column that says yes or no? or just extract the row if it's true and put it into another df?
+
+#put DATETIME together for a posixct 
+
+cm_sun$DateTime <- as.POSIXct(paste(cm_sun$DATE, cm_sun$TIME), format="%Y-%m-%d %H:%M:%S")
+
+#debug why it's not working- convert everything to just times
+
+df <- cm_sun %>%
+  # mutate(result = ifelse(autoid != "Noise" & DateTime >= sunrise & DateTime <= sunset, TRUE, FALSE))
+  mutate(across(c(sunrise, sunset, DateTime), as_hms)) %>%
+mutate(
+  daytime = ifelse(autoid != "Noise" & DateTime >= sunrise & DateTime <= sunset, TRUE, FALSE)
+)
+
+#find autoIDs that are bats or NoID in cm and put them to another dataframe
+
+daytimebats <- subset(df, daytime == "TRUE")
+
+
+
+# plot the result 
+
+ggplot(daytimebats) + 
+  geom_bin2d(aes(x = DATE, y = Site), bins = 100) +  # Adjust bins for detail
+  scale_fill_viridis_c() +  # Better color scale for density
+  xlab("Month") + ylab("Site") +
+  ggtitle("Bats during daytime") + 
+  theme_minimal()
+
+ggplot(daytimebats) +
+  aes(x = autoid, y = Site, fill = autoid) +
+  geom_tile() +
+  scale_fill_hue(direction = 1) +
+  theme_minimal()
+
+# save file as csv to get all data later:
+
+daytimebats <- daytimebats[, -7] # it was a matrix
+
+write_csv(daytimebats, "daytimebats_all.csv")
+
+
+# looking at only before sunset so eliminate detections after sunrise
+
+hrs_1 <- 1 * 60 * 60 
+
+df1 <- cm_sun %>%
+  # mutate(result = ifelse(autoid != "Noise" & DateTime >= sunrise & DateTime <= sunset, TRUE, FALSE))
+  mutate(across(c(sunrise, sunset, DateTime), as_hms)) %>%
+  mutate(
+    daytime = ifelse(autoid != "Noise" & DateTime >= sunrise + hrs_1 & DateTime <= sunset, TRUE, FALSE)
+  )
+
+#find autoIDs that are bats or NoID in cm and put them to another dataframe
+
+daytimebats1 <- subset(df1, daytime == "TRUE")
+
+ggplot(daytimebats1) + 
+  geom_bin2d(aes(x = DATE, y = Site), bins = 100) +  # Adjust bins for detail
+  scale_fill_viridis_c() +  # Better color scale for density
+  xlab("Month") + ylab("Site") +
+  ggtitle("Bats during daytime") + 
+  theme_minimal()
+
+# Graph with 3 instead of 5 aka sunset is 3h before aka all that is left from 
+
+hrs_3 <- 3 * 60 * 60 
+
+df3 <- cm_sun %>%
+  # mutate(result = ifelse(autoid != "Noise" & DateTime >= sunrise & DateTime <= sunset, TRUE, FALSE))
+  mutate(across(c(sunrise, sunset, DateTime), as_hms)) %>%
+  mutate(
+    daytime = ifelse(autoid != "Noise" & DateTime >= sunrise + hrs_1 & DateTime <= sunset - hrs_3, TRUE, FALSE)
+  )
+
+#find autoIDs that are bats or NoID in cm and put them to another dataframe
+
+daytimebats3 <- subset(df3, daytime == "TRUE")
+
+ggplot(daytimebats3) + 
+  geom_bin2d(aes(x = DATE, y = Site), bins = 100) +  # Adjust bins for detail
+  scale_fill_viridis_c() +  # Better color scale for density
+  xlab("Month") + ylab("Site") +
+  ggtitle("Bats during daytime") + 
+  theme_minimal()
+
+ggplot(daytimebats3) +
+  aes(x = autoid, y = Site, fill = autoid) +
+  geom_tile() +
+  scale_fill_hue(direction = 1) +
+  theme_minimal()
+
+
+# Graph with 2 instead of 5
+
+hrs_2 <- 2 * 60 * 60 
+
+df2 <- cm_sun %>%
+  # mutate(result = ifelse(autoid != "Noise" & DateTime >= sunrise & DateTime <= sunset, TRUE, FALSE))
+  mutate(across(c(sunrise, sunset, DateTime), as_hms)) %>%
+  mutate(
+    daytime = ifelse(autoid != "Noise" & DateTime >= sunrise + hrs_1 & DateTime <= sunset - hrs_2, TRUE, FALSE)
+  )
+
+#find autoIDs that are bats or NoID in cm and put them to another dataframe
+
+daytimebats2 <- subset(df2, daytime == "TRUE")
+
+ggplot(daytimebats2) + 
+  geom_bin2d(aes(x = DATE, y = Site), bins = 100) +  # Adjust bins for detail
+  scale_fill_viridis_c() +  # Better color scale for density
+  xlab("Month") + ylab("Site") +
+  ggtitle("Bats during daytime") + 
+  theme_minimal()
+
+# Graph with 4 instead of 5
+
+hrs_4 <- 4 * 60 * 60 
+
+df4 <- cm_sun %>%
+  # mutate(result = ifelse(autoid != "Noise" & DateTime >= sunrise & DateTime <= sunset, TRUE, FALSE))
+  mutate(across(c(sunrise, sunset, DateTime), as_hms)) %>%
+  mutate(
+    daytime = ifelse(autoid != "Noise" & DateTime >= sunrise + hrs_1 & DateTime <= sunset - hrs_4, TRUE, FALSE)
+  )
+
+#find autoIDs that are bats or NoID in cm and put them to another dataframe
+
+daytimebats4 <- subset(df4, daytime == "TRUE")
+
+ggplot(daytimebats4) + 
+  geom_bin2d(aes(x = DATE, y = Site), bins = 100) +  # Adjust bins for detail
+  scale_fill_viridis_c() +  # Better color scale for density
+  xlab("Month") + ylab("Site") +
+  ggtitle("Bats during daytime") + 
+  theme_minimal()
+
+
+# Subset with daytime bats before sunset ----------------------------------
+
+# all the listings in daytimebats1 (this is without those after sunrise)
+
+# esquisser()
+
+
+
