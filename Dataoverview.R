@@ -1,9 +1,8 @@
 
-# this project is made to get an overview of the data from all sites
-# information that has to be included in the data folder: 
-
-
-
+# This Rscript is made mainly to put together the data from all sites into 1 csv file
+# This script also gives an simple overview of the data.
+# Acquire cm_all_2024.csv (on onedrive, too big to upload to Github) to use the script
+# Last runthrough of script: 19/11/2025
 
 # setup -------------------------------------------------------------------
 # libraries used in this project
@@ -21,17 +20,19 @@ library(sp)
 library(sf)
 library(hms)
 #library(maptools)
-# library(ggcorrplot)
+#library(ggcorrplot)
 
 
-# read data in ------------------------------------------------------------
+# read location overview data in ------------------------------------------------------------
 
 deployment <-  read_csv("data/survey_deployment.csv")
 maintenance <-  read_csv("data/survey_maintenance.csv")
 overview_data <-  read_csv("data/overview_table.csv")
 
 
-# days deployed -----------------------------------------------------------
+# add columns that we know to location overview: days deployed, distance to water -----------------------------------------------------------
+  # add date retrieved to df deployment
+
 class(deployment$`Date and Time Deployed`)
 class(maintenance$`Date and Time`)
 
@@ -56,30 +57,28 @@ deployment <- merge(
   all = TRUE
 )
 
-#calculate days between deployment and retrieval
+  #calculate days between deployment and retrieval, add to df overview_data
 
-  
 overview_data$`days deployed`<- difftime(deployment$dateretrieved, deployment$`Date and Time Deployed`, units = c("days"))
 
-
-# distance from water, date and time deployed -----------------------------------------------------
+  # add distance to water and date and time deployed to df overview_data 
 
 overview_data$`distance from water` <- deployment$`Distance from detector to closest water body (m)`[match(overview_data$Location, deployment$`Site Name`)]
 overview_data$`date deployed` <- deployment$`Date and Time Deployed`[match(overview_data$Location, deployment$`Site Name`)]
 overview_data$`date retrieved` <- deployment$dateretrieved[match(overview_data$Location, deployment$`Site Name`)]
 
-# Make directories of all the sites and the id files -----------
+# Make directories of all the sites and the id files (takes a long time) -----------
 
-# Define the source and destination directories # computer shut down randomly, real codechunck did not survive
+  # Define the source and destination directories # computer shut down randomly, real codechunck did not survive
 source_dir <- "P:/SW_CoastalMonitoring/Data_collection_2024"
 destination_dir <- "data/IDfiles"
 
-# Get a list of all 50 site folders in source_dir
+  # Get a list of all 50 site folders in source_dir
 site_folders <- list.dirs(source_dir, recursive = FALSE)
 
-#########Don't run this 
+  ##Don't run this if you are not certain that you want to run the code! 
 
-# Loop through each site folder
+  # Loop through each site folder
 for (site in site_folders) {
   
   # Extract folder name
@@ -105,7 +104,7 @@ print("Merging complete!")
 
 
 
-# Vigadeparandus ----------------------------------------------------------
+# Correcting a mistake made before ----------------------------------------------------------
 
 # df <- list.files(path='data/IDfiles/CM-11', full.names = TRUE) %>% 
 #   lapply(read_csv) %>% 
@@ -137,12 +136,12 @@ print("Merging complete!")
 # print("Merging complete!")
 
 
-# read in in all the data --------------------------------------------------------------
+# read in all the data from 50 directories  --------------------------------------------------------------
 
 site_folders <- list.dirs("data/IDfiles", recursive = FALSE)
 idfiles_dir <- "data/IDfiles"
 
-# Loop through each site folder
+  # Loop through each site folder
 for (site in site_folders) {
   
   # Extract site name
@@ -169,16 +168,16 @@ for (site in site_folders) {
 }
 
 
-# how much data do I have?  ------------------------------------------------------------
+# how many rows of data do I have?  ------------------------------------------------------------
 
-# List all site names
+  # List all site names
 site_names <- sprintf("inputCM%02d", 1:50)
 
 
-# Initialize row sum
+  # Initialize row sum
 total_rows <- 0
 
-# Loop through each data frame
+  # Loop through each data frame
 for (site_var in site_names) {
   if (exists(site_var)) {  # Check if the dataframe exists
     total_rows <- total_rows + nrow(get(site_var))  # Add row count
@@ -187,13 +186,13 @@ for (site_var in site_names) {
   }
 }
 
-# Print total row count
+  # Print total row count
 print(paste("Total number of rows across all datasets:", total_rows))
 
 
-# all into 1 file --------------------------------------------------------------
+# Combine all into one file for 2024  --------------------------------------------------------------
 
-#make column with site name 
+  #make column with site name 
 for (i in 1:50) {
   
   # Generate site variable name dynamically
@@ -211,43 +210,57 @@ for (i in 1:50) {
 }
 
 
-# all into cm
+  # all into cm
 
-# Retrieve and combine all existing dataframes
+  # Retrieve and combine all existing dataframes
 all_sites_data <- lapply(site_names, function(site_var) {
   if (exists(site_var)) {
     get(site_var)  # Retrieve dataframe
   } 
 })
 
-# Bind all dataframes into one large dataframe
+  # Bind all dataframes into one large dataframe
 cm <- bind_rows(all_sites_data)
 
-# Check the final merged dataframe
+  # Check the final merged dataframe
 dim(cm)  # Should return (3503006 this is 3773 rows more than I got with a dataset that has no merging problems - 3499216, 45) where X includes the new "Site" column
 #run on 05.03 3499233
 head(cm)
 
-
-
-# make table neat ---------------------------------------------------------
-
+  #choose variables for dataset
 cm <- cm %>% 
   rename(
     filename = "OUT FILE FS",
     autoid = "AUTO ID*",
     DATE.12 = 'DATE-12',
     HOUR.12 = 'HOUR-12',
-    TIME.12 = 'TIME-12') %>% 
+    TIME.12 = 'TIME-12',
+    IN_FILE = "IN FILE", 
+    MATCH_RATIO = "MATCH RATIO") %>% 
   mutate(autoid = factor(autoid)) %>% 
-  dplyr::select(FOLDER, filename, DURATION, 
+  dplyr::select(OUTDIR, FOLDER, IN_FILE, filename, DURATION, 
                 DATE, TIME, HOUR,
                 DATE.12, TIME.12, HOUR.12,
-                autoid, Site
+                autoid, PULSES, MATCH_RATIO, Site
   )
 
+  # remove tests, by location: date deployed and date retrieved
 
-# noise -------------------------------------------------------------------
+cm <- cm %>% 
+  filter(DATE >= as.POSIXct("2024-06-14"))
+
+cm <- cm %>% 
+  mutate(DATE = replace(DATE, Site == "CM-39" & DATE > as.POSIXct("2024-10-10"), NA_POSIXct_)) %>% 
+  filter(!is.na(DATE))
+
+  # write working csv
+write.csv(cm, "cm_all_2024.csv")
+
+  # read csv in
+
+cm <- read.csv("cm_all_2024.csv")
+
+# Where is the most noise  -------------------------------------------------------------------
 
 barnoise <- ggplot(cm) + 
   geom_bar(aes(x= Site, fill = autoid), position = "fill") +
@@ -259,23 +272,7 @@ barnoise <- ggplot(cm) +
 barnoise
 
 
-# remove tests, by location: date deployed and date retrieved?
-
-cm <- cm %>% 
-  filter(DATE >= as.POSIXct("2024-06-14"))
-
-cm <- cm %>% 
-  mutate(DATE = replace(DATE, Site == "CM-39" & DATE > as.POSIXct("2024-10-10"), NA_POSIXct_)) %>% 
-  filter(!is.na(DATE))
-
-write.csv(cm, "cm_all.csv")
-
-#read
-
-cm <- read.csv("cm_all.csv")
-
-
-# recording period
+# visualize recording period
 
 ggplot(cm) + 
   geom_bin2d(aes(x = DATE.12, y = Site), bins = 100) +  # Adjust bins for detail
