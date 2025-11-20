@@ -533,8 +533,53 @@ date_early <- cm %>%
   group_by(Site) %>%
   summarise(earliest = min(DATE))
 
+# find latest date
+date_late <- cm %>%
+  group_by(Site) %>%
+  summarise(latest = max(DATE))
+
+# add dates to overview_data
+
+overview_data$`first recording` <- date_early$earliest[match(overview_data$Location, date_early$Site)]
+
+overview_data$`last recording` <- date_late$latest[match(overview_data$Location, date_late$Site)]
 
 
 
+
+
+
+# Proportion of noise to overview_data ------------------------------------
+# number of total files per site
+totalfiles <- cm %>%
+  group_by(Site) %>%
+  summarise(total = table(Site)) 
+
+
+# number of noise files per site
+noisefiles <- cm %>%
+  group_by(Site) %>%
+  summarise(noise = sum(autoid=="Noise"))
+
+# percentage of noise from total number
+
+
+
+
+# number of bat + NOID per site
+batfiles <- cm %>%
+  group_by(Site) %>%
+  summarise(batfile = sum(autoid!="Noise"))
+
+overview_data$`n of bat calls` <- batfiles$batfile[match(overview_data$Location, batfiles$Site)]
+
+# number of pnat per site
+pnatfiles <- cm  %>%
+  group_by(Site) %>%
+  summarise(pnatfile = sum(autoid=="PIPNAT"))
+
+overview_data$`n of pnat calls` <- pnatfiles$pnatfile[match(overview_data$Location, pnatfiles$Site)]
+
+## after this look for a easier way to do it and add it here + delete other columns from overview and make it neat with better headings + save as a base table!
 
 
