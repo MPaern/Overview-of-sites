@@ -512,5 +512,29 @@ ggplot(daytimebats4) +
 
 # esquisser()
 
+# Days operational, earliest and latest date when active --------------------------------------------------------
+# count unique dates per location in cm
+date_counts <- cm %>%
+  group_by(Site) %>%
+  summarise(n_unique_dates = n_distinct(DATE))
+
+# rename Site to Location
+date_counts <- date_counts %>% 
+  rename(
+    Location = "Site")
+
+# add counts into overview_data
+
+overview_data$`days operational` <- date_counts$`n_unique_dates`[match(overview_data$Location, date_counts$`Location`)]
+
+
+# find earliest date
+date_early <- cm %>%
+  group_by(Site) %>%
+  summarise(earliest = min(DATE))
+
+
+
+
 
 
