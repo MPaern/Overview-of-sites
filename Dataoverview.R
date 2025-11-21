@@ -28,7 +28,7 @@ library(hms)
 deployment <-  read_csv("data/survey_deployment.csv")
 maintenance <-  read_csv("data/survey_maintenance.csv")
 overview_data <-  read_csv("data/overview_table.csv")
-
+coordinates <- read_csv("data/GPS_2024.csv")
 
 # Make directories of all the sites and the id files (takes a long time) -----------
 
@@ -273,6 +273,10 @@ deployment <- deployment %>%
   rename(
     Site = "Site Name")
 
+coordinates <- coordinates %>% 
+  rename(
+    Site = "Name")
+
 overview_data <- overview_data %>% 
   rename(
     Site = Location)
@@ -280,10 +284,17 @@ overview_data <- overview_data %>%
 overview_summary <- overview_summary %>%
   left_join(
     deployment %>%
-    select(Site,
-           date_deployed = "Date and Time Deployed",
-           date_retrieved = dateretrieved),
-    by= "Site"
+      mutate(
+        distance_coast_km = as.numeric(gsub(",", ".", `Distance to coast (km)...28`))
+      ) %>%
+      select(
+        Site,
+        date_deployed = `Date and Time Deployed`,
+        date_retrieved = dateretrieved,
+        distance_water_m = `Distance from detector to closest water body (m)`,
+        distance_coast_km
+      ),
+    by = "Site"
   )
 
 overview_summary <- overview_summary %>%
@@ -294,8 +305,17 @@ overview_summary <- overview_summary %>%
     by= "Site"
   )
 
-### distance to closest waterbody to add!!!
-  
+overview_summary <- overview_summary %>%
+  left_join(
+    coordinates %>%
+      select(Site,
+             latitude = Latitude,
+             longitude = Longitude),
+    by= "Site"
+  )
+
+  # CM-46 wrong distance
+overview_summary[46,15] = 1.246  
 
 #esquisser()
 
@@ -309,11 +329,6 @@ ggplot(overview_summary) +
        y = "Number of recordings with bat calls", title = "Correlation between noise and bat calls", subtitle = "By location") +
   theme_classic() +
   theme(legend.text = element_text(face = "bold"), legend.title = element_text(face = "bold"))
-
-# clean overview_table
-
-# save as base table
-
 
 # Where is the most noise  -------------------------------------------------------------------
 
