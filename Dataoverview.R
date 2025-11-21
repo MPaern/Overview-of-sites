@@ -2,7 +2,7 @@
 # This Rscript is made mainly to put together the data from all sites into 1 csv file
 # This script also gives an simple overview of the data.
 # Acquire cm_all_2024.csv (on onedrive, too big to upload to Github) to use the script
-# Last runthrough of script: 19/11/2025
+# Last run through of script: 21/11/2025
 
 # setup -------------------------------------------------------------------
 # libraries used in this project
@@ -29,43 +29,6 @@ deployment <-  read_csv("data/survey_deployment.csv")
 maintenance <-  read_csv("data/survey_maintenance.csv")
 overview_data <-  read_csv("data/overview_table.csv")
 
-
-# add columns that we know to location overview: days deployed, distance to water -----------------------------------------------------------
-  # add date retrieved to df deployment
-
-class(deployment$`Date and Time Deployed`)
-class(maintenance$`Date and Time`)
-
-deployment$`Date and Time Deployed` <- as.POSIXct(deployment$`Date and Time Deployed`, format="%m/%d/%Y %H:%M:%S %p")
-
-
-maintenance$`Date and Time` <- parse_date_time(maintenance$`Date and Time`, 
-                                               orders = c("m/d/Y I:M:S p", "m/d/Y H:M"))
-  
-maintenance$dateretrieved <- ifelse(grepl("etri", maintenance$Comments), maintenance$`Date and Time`, NA)
-
-maintenance$dateretrieved <- as.POSIXct(maintenance$dateretrieved, origin="1970-01-01")
-
-unique_maintenance <- unique(maintenance[, c("Site Name", "dateretrieved")])
-
-unique_maintenance <- na.omit(unique_maintenance)
-
-deployment <- merge(
-  deployment,
-  unique_maintenance,
-  by = "Site Name",
-  all = TRUE
-)
-
-  #calculate days between deployment and retrieval, add to df overview_data
-
-overview_data$`days deployed`<- difftime(deployment$dateretrieved, deployment$`Date and Time Deployed`, units = c("days"))
-
-  # add distance to water and date and time deployed to df overview_data 
-
-overview_data$`distance from water` <- deployment$`Distance from detector to closest water body (m)`[match(overview_data$Location, deployment$`Site Name`)]
-overview_data$`date deployed` <- deployment$`Date and Time Deployed`[match(overview_data$Location, deployment$`Site Name`)]
-overview_data$`date retrieved` <- deployment$dateretrieved[match(overview_data$Location, deployment$`Site Name`)]
 
 # Make directories of all the sites and the id files (takes a long time) -----------
 
@@ -259,6 +222,98 @@ write.csv(cm, "cm_all_2024.csv")
   # read csv in
 
 cm <- read.csv("cm_all_2024.csv")
+
+
+
+# Make overview table for the year, mostly based on the 2024 all data combined folder.  --------
+  #CM-34 was lakesite, changing that in the dataframe
+
+overview_data[34,2] = "lake"  
+
+# new table called overview_summary
+
+overview_summary <- cm %>%
+  group_by(Site) %>%
+  summarise(
+    total = n(),
+    noise = sum(autoid == "Noise"),
+    noise_pct = 100 * noise / total,
+    pnatcalls = sum(autoid == "PIPNAT"),
+    batcalls = sum(autoid!="Noise"),
+    pnatcalls_pct = 100 * pnatcalls/ batcalls,
+    days_active = sum(n_distinct(DATE)),
+    earliest_active = min(DATE),
+    last_active = max(DATE),
+  )
+
+  # add info from other tables
+    # Make date more readable
+deployment <- deployment %>%
+  mutate(`Date and Time Deployed` = parse_date_time(`Date and Time Deployed`,
+                                                    orders = "m/d/Y I:M:S p"))
+
+retrieval <- maintenance %>%
+  mutate(
+    `Date and Time` = parse_date_time(`Date and Time`,
+                                      orders = c("m/d/Y I:M:S p", "m/d/Y H:M")),
+    dateretrieved = if_else(
+      grepl("etri", Comments, ignore.case = TRUE), 
+      `Date and Time`,
+      as.POSIXct(NA)
+    )
+  ) %>%
+  distinct(`Site Name`, dateretrieved) %>%   
+  drop_na(dateretrieved)                     
+
+  # Join onto deployment
+deployment <- deployment %>%
+  left_join(retrieval, by = "Site Name")
+
+deployment <- deployment %>% 
+  rename(
+    Site = "Site Name")
+
+overview_data <- overview_data %>% 
+  rename(
+    Site = Location)
+
+overview_summary <- overview_summary %>%
+  left_join(
+    deployment %>%
+    select(Site,
+           date_deployed = "Date and Time Deployed",
+           date_retrieved = dateretrieved),
+    by= "Site"
+  )
+
+overview_summary <- overview_summary %>%
+  left_join(
+    overview_data %>%
+      select(Site,
+             type = type),
+    by= "Site"
+  )
+
+### distance to closest waterbody to add!!!
+  
+
+#esquisser()
+
+# plot of noise and nr of bat calls
+ggplot(overview_summary) +
+  aes(x = `noise_pct`, y = `batcalls`, colour = type) +
+  geom_point(size = 3.35, 
+             shape = "diamond") +
+  scale_color_viridis_d(option = "cividis", direction = 1) +
+  labs(x = "Percentage of noise files in recordings", 
+       y = "Number of recordings with bat calls", title = "Correlation between noise and bat calls", subtitle = "By location") +
+  theme_classic() +
+  theme(legend.text = element_text(face = "bold"), legend.title = element_text(face = "bold"))
+
+# clean overview_table
+
+# save as base table
+
 
 # Where is the most noise  -------------------------------------------------------------------
 
@@ -512,117 +567,4 @@ ggplot(daytimebats4) +
 
 # esquisser()
 
-# Days operational, earliest and latest date when active --------------------------------------------------------
-# count unique dates per location in cm
-date_counts <- cm %>%
-  group_by(Site) %>%
-  summarise(n_unique_dates = n_distinct(DATE))
 
-# rename Site to Location
-date_counts <- date_counts %>% 
-  rename(
-    Location = "Site")
-
-# add counts into overview_data
-
-overview_data$`days operational` <- date_counts$`n_unique_dates`[match(overview_data$Location, date_counts$`Location`)]
-
-
-# find earliest date
-date_early <- cm %>%
-  group_by(Site) %>%
-  summarise(earliest = min(DATE))
-
-# find latest date
-date_late <- cm %>%
-  group_by(Site) %>%
-  summarise(latest = max(DATE))
-
-# add dates to overview_data
-
-overview_data$`first recording` <- date_early$earliest[match(overview_data$Location, date_early$Site)]
-
-overview_data$`last recording` <- date_late$latest[match(overview_data$Location, date_late$Site)]
-
-
-
-
-
-
-# Proportion of noise to overview_data ------------------------------------
-
-
-# number of total files per site
-totalfiles <- cm %>%
-  group_by(Site) %>%
-  summarise(total = table(Site)) 
-
-
-# number of noise files per site
-noisefiles <- cm %>%
-  group_by(Site) %>%
-  summarise(noise = sum(autoid=="Noise"))
-
-# percentage of noise from total number
-
-noise_percent <- left_join(totalfiles, noisefiles, by= "Site")
-noise_percent$noise_of_total <- (noise_percent$noise/noise_percent$total)*100
-
-
-noise_percent <- noise_percent %>% 
-  mutate(noise_of_total = as.numeric(noise_of_total))
-
-overview_data$`% of noise` <- noise_percent$noise_of_total[match(overview_data$Location, noise_percent$Site)]
-
-
-# number of bat + NOID per site
-batfiles <- cm %>%
-  group_by(Site) %>%
-  summarise(batfile = sum(autoid!="Noise"))
-
-overview_data$`n of bat calls` <- batfiles$batfile[match(overview_data$Location, batfiles$Site)]
-
-# number of pnat per site
-pnatfiles <- cm  %>%
-  group_by(Site) %>%
-  summarise(pnatfile = sum(autoid=="PIPNAT"))
-
-overview_data$`n of pnat calls` <- pnatfiles$pnatfile[match(overview_data$Location, pnatfiles$Site)]
-
-#CM-34 was lakesite, changing that in the dataframe
-
-overview_data[34,2] = "lake"
-
-
-#esquisser()
-
-# plot of noise and nr of bat calls
-ggplot(overview_data) +
- aes(x = `% of noise`, y = `n of bat calls`, colour = type) +
- geom_point(size = 3.35, 
- shape = "diamond") +
- scale_color_viridis_d(option = "cividis", direction = 1) +
- labs(x = "Percentage of noise files in recordings", 
- y = "Number of recordings with bat calls", title = "Correlation between noise and bat calls", subtitle = "By location") +
- theme_classic() +
- theme(legend.text = element_text(face = "bold"), legend.title = element_text(face = "bold"))
-
-# clean overview_table
-
-# save as base table
-
-# More efficient version to do things  ------------------------------------
-
-overview_summary <- cm %>%
-  group_by(Site) %>%
-  summarise(
-    total = n(),
-    noise = sum(autoid == "Noise"),
-    noise_pct = 100 * noise / total,
-    pnatcalls = sum(autoid == "PIPNAT"),
-    batcalls = sum(autoid!="Noise"),
-    pnatcalls_pct = 100 * pnatcalls/ batcalls,
-    days_active = sum(n_distinct(DATE)),
-    earliest_active = min(DATE),
-    last_avtive = max(DATE),
-  )
