@@ -550,6 +550,8 @@ overview_data$`last recording` <- date_late$latest[match(overview_data$Location,
 
 
 # Proportion of noise to overview_data ------------------------------------
+
+
 # number of total files per site
 totalfiles <- cm %>%
   group_by(Site) %>%
@@ -563,7 +565,14 @@ noisefiles <- cm %>%
 
 # percentage of noise from total number
 
+noise_percent <- left_join(totalfiles, noisefiles, by= "Site")
+noise_percent$noise_of_total <- (noise_percent$noise/noise_percent$total)*100
 
+
+noise_percent <- noise_percent %>% 
+  mutate(noise_of_total = as.numeric(noise_of_total))
+
+overview_data$`% of noise` <- noise_percent$noise_of_total[match(overview_data$Location, noise_percent$Site)]
 
 
 # number of bat + NOID per site
@@ -580,6 +589,40 @@ pnatfiles <- cm  %>%
 
 overview_data$`n of pnat calls` <- pnatfiles$pnatfile[match(overview_data$Location, pnatfiles$Site)]
 
-## after this look for a easier way to do it and add it here + delete other columns from overview and make it neat with better headings + save as a base table!
+#CM-34 was lakesite, changing that in the dataframe
+
+overview_data[34,2] = "lake"
 
 
+#esquisser()
+
+# plot of noise and nr of bat calls
+ggplot(overview_data) +
+ aes(x = `% of noise`, y = `n of bat calls`, colour = type) +
+ geom_point(size = 3.35, 
+ shape = "diamond") +
+ scale_color_viridis_d(option = "cividis", direction = 1) +
+ labs(x = "Percentage of noise files in recordings", 
+ y = "Number of recordings with bat calls", title = "Correlation between noise and bat calls", subtitle = "By location") +
+ theme_classic() +
+ theme(legend.text = element_text(face = "bold"), legend.title = element_text(face = "bold"))
+
+# clean overview_table
+
+# save as base table
+
+# More efficient version to do things  ------------------------------------
+
+overview_summary <- cm %>%
+  group_by(Site) %>%
+  summarise(
+    total = n(),
+    noise = sum(autoid == "Noise"),
+    noise_pct = 100 * noise / total,
+    pnatcalls = sum(autoid == "PIPNAT"),
+    batcalls = sum(autoid!="Noise"),
+    pnatcalls_pct = 100 * pnatcalls/ batcalls,
+    days_active = sum(n_distinct(DATE)),
+    earliest_active = min(DATE),
+    last_avtive = max(DATE),
+  )
