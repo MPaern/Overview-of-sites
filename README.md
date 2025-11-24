@@ -1,4 +1,4 @@
-As of 18/11 messy code not looked through. 
+
 Code to summarize acoustic data from 50 locations. 
-In the proccess of making things more readable.
-Stay tuned.
+
+<a href="https://example.com">Untitled</a> © 1999 by <a href="https://example.com">Jane Doe</a> is licensed under <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a><img src="https://mirrors.creativecommons.org/presskit/icons/cc.svg" alt="" style="max-width: 1em;max-height:1em;margin-left: .2em;"><img src="https://mirrors.creativecommons.org/presskit/icons/by.svg" alt="" style="max-width: 1em;max-height:1em;margin-left: .2em;">
