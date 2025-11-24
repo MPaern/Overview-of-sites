@@ -51,8 +51,6 @@ Detector dead: 33\
 
 Average time detector deployed: `r mean(overview_summary$days_active)`\
 
-Time difference of 98.17697 days
-
 ```{r}
 
 

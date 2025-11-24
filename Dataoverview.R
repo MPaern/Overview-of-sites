@@ -30,6 +30,7 @@ maintenance <-  read_csv("data/survey_maintenance.csv")
 overview_data <-  read_csv("data/overview_table.csv")
 coordinates <- read_csv("data/GPS_2024.csv")
 
+
 # Make directories of all the sites and the id files (takes a long time) -----------
 
   # Define the source and destination directories # computer shut down randomly, real codechunck did not survive
@@ -314,7 +315,7 @@ overview_summary <- overview_summary %>%
     by= "Site"
   )
 
-  # CM-46 wrong distance
+  # CM-46 wrong distance (more wrong distances, fix it by hand)
 overview_summary[46,14] = 1.246  
 
 #esquisser()
@@ -401,6 +402,11 @@ overview_summary <- overview_summary %>%
               missing_days = missing_days),
     by= "Site"
   )
+
+# change NA to 0 in missing_days
+
+overview_summary <- overview_summary %>% 
+  mutate(missing_days = ifelse(is.na(missing_days), 0, missing_days))
 
 write.csv(overview_summary, "overview_2024.csv")
 
