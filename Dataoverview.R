@@ -1,7 +1,7 @@
 
 # This Rscript is made mainly to put together the data from all sites into 1 csv file
-# This script also gives an simple overview of the data.
-# Acquire cm_all_2024.csv (on onedrive, too big to upload to Github) to use the script
+# This script also gives a simple overview of the data.
+# Acquire cm_all_2024.csv (on Onedrive, too big to upload to Github) to use the script
 # Last run through of script: 21/11/2025
 
 # setup -------------------------------------------------------------------
@@ -387,11 +387,6 @@ ggplot(missing_dates) +
   theme_minimal()
 
 #write.csv(missing_dates, "Missing dates v5.csv")
-
-
-
-
-
 
 
 # daytime noise -----------------------------------------------------------

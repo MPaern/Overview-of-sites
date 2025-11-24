@@ -5,9 +5,16 @@ format: html
 editor: visual
 ---
 
-## Overview
+```{r}
+# read necessary data in
 
-###Year in numbers
+overview_summary <- read.csv("overview_2024.csv")
+
+```
+
+## Summary of 2024
+
+### Year in numbers
 
 Number of detectors: 50\
 
@@ -19,9 +26,9 @@ Date of first deployment:\
 
 Date of last deployment:\
 
-Date of first retrieval: `r min(deployment$dateretrieved)`\
+Date of first retrieval: `r min(overview_summary$date_retrieved)`\
 
-Date of last retrieval: `r max(deployment$dateretrieved)`\
+Date of last retrieval: `r max(overview_summary$date_retrieved)`\
 
 Days detectors were on the field: 4908\
 
@@ -44,11 +51,8 @@ Average time detector deployed: mean(overview_data\$`days deployed`)\
 Time difference of 98.17697 days
 
 ```{r}
-#try the size thing
 
 
-remotes::install_github("fdetsch/MODIS")
-fileSize("P:/SW_CoastalMonitoring/Data_collection_2024/CM-01/DATA", units = c("GB"))
 
 ```
 
