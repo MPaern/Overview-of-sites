@@ -6,6 +6,7 @@ editor: visual
 ---
 
 ```{r}
+#| echo: false
 # read necessary data in
 
 overview_summary <- read.csv("overview_2024.csv")
@@ -13,6 +14,8 @@ overview_summary <- read.csv("overview_2024.csv")
 ```
 
 ## Summary of 2024
+
+![](images/DSC05850.JPG)
 
 ### Year in numbers
 
@@ -22,9 +25,9 @@ Number of detectors that survived the season: 48\
 
 Reasons of detector failure: Water damage by humans, seawater damage by other forces\
 
-Date of first deployment:\
+Date of first deployment:`r min(overview_summary$date_deployed)`\
 
-Date of last deployment:\
+Date of last deployment:`r max(overview_summary$date_deployed)`\
 
 Date of first retrieval: `r min(overview_summary$date_retrieved)`\
 
@@ -46,7 +49,7 @@ Batteries empty: 23\
 
 Detector dead: 33\
 
-Average time detector deployed: mean(overview_data\$`days deployed`)\
+Average time detector deployed: `r mean(overview_summary$days_active)`\
 
 Time difference of 98.17697 days
 

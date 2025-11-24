@@ -315,7 +315,7 @@ overview_summary <- overview_summary %>%
   )
 
   # CM-46 wrong distance
-overview_summary[46,15] = 1.246  
+overview_summary[46,14] = 1.246  
 
 #esquisser()
 
@@ -330,7 +330,8 @@ ggplot(overview_summary) +
   theme_classic() +
   theme(legend.text = element_text(face = "bold"), legend.title = element_text(face = "bold"))
 
-# Where is the most noise  -------------------------------------------------------------------
+
+# Where is the most noise, visualisation  -------------------------------------------------------------------
 
 barnoise <- ggplot(cm) + 
   geom_bar(aes(x= Site, fill = autoid), position = "fill") +
@@ -352,27 +353,26 @@ ggplot(cm) +
   theme_minimal()
 
 
-# gaps in dataset ---------------------------------------------------------
+# gaps in dataset, more info for overview ---------------------------------------------------------
 # DATE.12 is the start of the night eg. the start date. 
 
 # Step 1: Generate a complete sequence of dates for each site from deployment
-complete_dates <- deployment %>% 
+complete_dates <- overview_summary %>% 
   mutate(
-    BeginDate = as.Date(`Date and Time Deployed`),
-    EndDate   = as.Date(`dateretrieved`) - 1,
+    BeginDate = as.Date(date_deployed),
+    EndDate   = as.Date(date_retrieved) - 1,
     full_dates = map2(BeginDate, EndDate, ~ seq.Date(from = .x, to = .y, by = "day"))
   ) %>%
-  select(`Site Name`, full_dates) %>%
+  select(Site, full_dates) %>%
   unnest(full_dates) %>%
   rename(ExpectedDate = full_dates)
 
 # Step 2: Get the actual available dates from cm by site
 available_dates <- cm %>%
-  reframe(ActualDate = unique(DATE.12), .by = "Site")
+  mutate(ActualDate = as.Date(DATE.12)) %>%
+  reframe(ActualDate = unique(ActualDate), .by = "Site")
 
 # Step 3: For each site, find the dates that are expected but missing in the actual data
-complete_dates <- complete_dates %>%
-rename(Site = `Site Name`)
 
 missing_dates <- complete_dates %>%
   anti_join(available_dates, by = c("Site", "ExpectedDate" = "ActualDate"))
@@ -385,6 +385,26 @@ ggplot(missing_dates) +
   xlab("Date in season") + ylab(" ") +
   ggtitle("Missing dates") + 
   theme_minimal()
+
+# add missing dates to overview_summary
+
+n_missing_days <- missing_dates %>%
+  group_by(Site) %>%
+  summarise(
+    missing_days = n(),
+  )
+    
+overview_summary <- overview_summary %>%
+  left_join(
+    n_missing_days %>%
+      select(Site,
+              missing_days = missing_days),
+    by= "Site"
+  )
+
+write.csv(overview_summary, "overview_2024.csv")
+
+overview_summary <- read.csv("overview_2024.csv")
 
 #write.csv(missing_dates, "Missing dates v5.csv")
 
@@ -574,6 +594,7 @@ ggplot(daytimebats4) +
 # Subset with daytime bats before sunset ----------------------------------
 
 # all the listings in daytimebats1 (this is without those after sunrise)
+# to go through 2024 and put new ID files to the ones with different outdir.
 
 # esquisser()
 
