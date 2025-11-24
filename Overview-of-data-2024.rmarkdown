@@ -1,0 +1,89 @@
+---
+title: "Overview of data collected in the field season of 2024 for coastal monitoring"
+author: "Maris Pärn"
+format: html
+editor: visual
+---
+
+```{r}
+# read necessary data in
+
+overview_summary <- read.csv("overview_2024.csv")
+
+```
+
+
+
+
+## Summary of 2024
+
+### Year in numbers
+
+Number of detectors: 50\
+
+Number of detectors that survived the season: 48\
+
+Reasons of detector failure: Water damage by humans, seawater damage by other forces\
+
+Date of first deployment:\
+
+Date of last deployment:\
+
+Date of first retrieval: `r min(overview_summary$date_retrieved)`\
+
+Date of last retrieval: `r max(overview_summary$date_retrieved)`\
+
+Days detectors were on the field: 4908\
+
+Days with missing data: 320 or 319\
+
+\% of missing data from all data: ca 6,5\
+
+Reasons of missing data:\
+
+1\) No bats, no noise detected: 19\
+
+2\) SD card full: 238\
+
+Batteries empty: 23\
+
+Detector dead: 33\
+
+Average time detector deployed: mean(overview_data\$`days deployed`)\
+
+Time difference of 98.17697 days
+
+```{r}
+#try the size thing
+
+
+remotes::install_github("fdetsch/MODIS")
+fileSize("P:/SW_CoastalMonitoring/Data_collection_2024/CM-01/DATA", units = c("GB"))
+
+```
+
+Raw data, auto-id
+
+## Operational
+
+time, comments from survey123, what SDcard problems were had, batterylife etc
+
+```{r}
+1 + 1
+
+
+```
+
+## Noise
+
+How much, when, what happened during daytime?
+
+```{r}
+#| echo: false
+2 * 2
+```
+
+## Bats
+
+Who, when, daytime recordings? - this should not be done with autoid data.
+
