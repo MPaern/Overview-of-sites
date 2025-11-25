@@ -418,6 +418,63 @@ overview_summary <- read.csv("overview_2024.csv")
 
 #write.csv(missing_dates, "Missing dates v5.csv")
 
+#Judith, only use CM-04, CM-05, CM-06, CM-21, CM-23, CM-42
+
+missing_dates_J <- missing_dates %>%
+  filter(
+  Site %in% c( "CM-04", "CM-05", "CM-06", "CM-21", "CM-23", "CM-42")
+  )
+
+cm_J <- cm  %>%
+  filter(
+    Site %in% c( "CM-04", "CM-05", "CM-06", "CM-21", "CM-23", "CM-42")
+  )
+
+ggplot(missing_dates_J) + 
+  geom_point(aes(x = ExpectedDate, y = Site)) +  
+  scale_fill_viridis_c() + 
+  xlab("Date in season") + ylab(" ") +
+  ggtitle("Missing dates") + 
+  theme_minimal()
+
+complete_dates_J <- complete_dates  %>%
+  filter(
+    Site %in% c( "CM-04", "CM-05", "CM-06", "CM-21", "CM-23", "CM-42")
+  )
+
+available_dates_J <- available_dates %>%
+  filter(
+    Site %in% c( "CM-04", "CM-05", "CM-06", "CM-21", "CM-23", "CM-42")
+  )
+
+available_dates_J <- available_dates_J %>%
+  mutate(Type = "Observed")
+
+missing_dates_J <- missing_dates_J %>%
+  mutate(Type = "Missing")
+
+all_dates_J <- bind_rows(available_dates_J, missing_dates_J)
+
+missing_dates_J <- missing_dates_J %>%
+  rename(
+    Date = ExpectedDate
+  )
+
+available_dates_J <- available_dates_J %>%
+  rename(
+    Date = ActualDate
+  )
+
+ggplot(all_dates_J, aes(x = Date, y = Site, color = Type)) +
+  geom_point(size = 2) +
+  scale_color_manual(values = c("Observed" = "darkgrey", "Missing" = "red")) +
+  theme_minimal() +
+  labs(title = "Observed and Missing Dates for Judith's locations 2024")
+
+
+# make a dataset for 2025
+
+
 
 # daytime noise -----------------------------------------------------------
 # make new df with sunrise and sunset times 
