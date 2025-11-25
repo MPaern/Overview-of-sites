@@ -29,6 +29,7 @@ deployment <-  read_csv("data/survey_deployment.csv")
 maintenance <-  read_csv("data/survey_maintenance.csv")
 overview_data <-  read_csv("data/overview_table.csv")
 coordinates <- read_csv("data/GPS_2024.csv")
+water <- read_csv("data/distance_from_water_2024.csv")
 
 
 # Make directories of all the sites and the id files (takes a long time) -----------
@@ -285,15 +286,10 @@ overview_data <- overview_data %>%
 overview_summary <- overview_summary %>%
   left_join(
     deployment %>%
-      mutate(
-        distance_coast_km = as.numeric(gsub(",", ".", `Distance to coast (km)...28`))
-      ) %>%
       select(
         Site,
         date_deployed = `Date and Time Deployed`,
         date_retrieved = dateretrieved,
-        distance_water_m = `Distance from detector to closest water body (m)`,
-        distance_coast_km
       ),
     by = "Site"
   )
@@ -315,8 +311,16 @@ overview_summary <- overview_summary %>%
     by= "Site"
   )
 
-  # CM-46 wrong distance (more wrong distances, fix it by hand)
-overview_summary[46,14] = 1.246  
+  # distance to water bodies
+
+overview_summary <- overview_summary %>%
+  left_join(
+    water %>%
+      select(Site,
+             m_to_freshwater = "distance to freshwater (m)",
+             m_to_coast = "distance to coast (m)"),
+    by= "Site"
+  )
 
 #esquisser()
 
