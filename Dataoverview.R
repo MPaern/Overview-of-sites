@@ -474,6 +474,24 @@ ggplot(all_dates_J, aes(x = Date, y = Site, color = Type)) +
 
 # make a dataset for 2025
 
+missing_dates_J_2025 <- read.csv("data/missing_dates_J_2025.csv")
+
+
+# plot
+
+missing_dates_J_2025 <- missing_dates_J_2025 %>%
+  mutate(Date=dmy(Date))
+
+class(missing_dates_J_2025$Date)
+missing_dates_J_2025 <- na.omit(missing_dates_J_2025)
+
+ggplot(missing_dates_J_2025, aes(x = Date, y = Site, color = Type)) +
+  geom_point(size = 2) +
+  scale_color_manual(values = c("Observed" = "darkgrey", "Missing" = "red")) +
+  theme_minimal() +
+  labs(title = "Observed and Missing Dates for Judith's locations 2025") + 
+  scale_x_date(date_breaks = "1 month", , date_labels = "%b")
+
 
 
 # daytime noise -----------------------------------------------------------
