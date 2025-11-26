@@ -412,6 +412,14 @@ overview_summary <- overview_summary %>%
 overview_summary <- overview_summary %>% 
   mutate(missing_days = ifelse(is.na(missing_days), 0, missing_days))
 
+# some types still wrong
+
+overview_summary[1,14] = "inland" 
+overview_summary[31,14] = "coast" 
+overview_summary[40,14] = "coast" 
+
+#final product 
+
 write.csv(overview_summary, "overview_2024.csv")
 
 overview_summary <- read.csv("overview_2024.csv")
