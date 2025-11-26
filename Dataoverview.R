@@ -681,6 +681,6 @@ ggplot(daytimebats4) +
 # all the listings in daytimebats1 (this is without those after sunrise)
 # to go through 2024 and put new ID files to the ones with different outdir.
 
-# esquisser()
+
 
 
