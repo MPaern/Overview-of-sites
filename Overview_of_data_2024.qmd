@@ -7,9 +7,20 @@ editor: visual
 
 ```{r}
 #| echo: false
+#| warning: false
+
+#setup
+
+library(tidyverse)
+library(ggplot2)
+library(dplyr)
+library(lubridate)
+library(MetBrewer)
+
 # read necessary data in
 
 overview_summary <- read.csv("overview_2024.csv")
+cm <- read.csv("cm_all_2024.csv")
 
 ```
 
@@ -51,33 +62,139 @@ Detector dead: 33\
 
 Average time detector deployed: `r mean(overview_summary$days_active)`\
 
-```{r}
-
-
-
-```
-
-Raw data, auto-id
-
-## Operational
-
-time, comments from survey123, what SDcard problems were had, batterylife etc
-
-```{r}
-1 + 1
-
-
-```
-
 ## Noise
 
-How much, when, what happened during daytime?
+@fig-noise Shows the proportion of noise in all the sites. We can see that some of the sites are a lot noisier than others and @fig-noise-compare shows that coastal sites tend to have more noise. 
 
 ```{r}
 #| echo: false
-2 * 2
+#| label: fig-noise
+#| warning: false
+#| fig-cap: Proportion of noise on sites
+
+ggplot(cm) + 
+  geom_bar(aes(x= reorder(Site, autoid == "Noise", FUN = mean), fill = autoid == "Noise"), position = "fill", width = 0.9) +
+  scale_fill_manual(name = "AutoID", values = c("TRUE" = "royalblue4", "FALSE" = "olivedrab3"), labels = c("Auto-ID bat calls", "Noise")) +
+  ylab("Proportion of recordings") + 
+  xlab("Site") +
+  theme(text = element_text(size = 10)) +
+  coord_flip() + 
+  scale_x_discrete(expand = expansion(mult = c(0.01, 0.01)))+
+  theme_minimal()
+
 ```
 
-## Bats
+```{r}
+#| echo: false
+#| label: fig-noise-compare
+#| warning: false
+#| fig-cap: Comparison of noise in different sites
+#| fig-subcap:
+#| - "Noise on coast"
+#| - "Noise around lakes"
+#| - "Noise inland"
+#| layout-ncol: 3
+#| column: page
 
-Who, when, daytime recordings? - this should not be done with autoid data.
+
+noise_coast <- cm[,c(13,16)]
+noise_coast$type <- overview_summary$type[match(noise_coast$Site, overview_summary$Site)]
+
+ggplot(subset(noise_coast, type == "coast")) + 
+  geom_bar(aes(x= reorder(Site, autoid == "Noise", FUN = mean), fill = autoid == "Noise"), position = "fill", width = 0.9) +
+  scale_fill_manual(name = "AutoID", values = c("TRUE" = "royalblue4", "FALSE" = "olivedrab3"), labels = c("Auto-ID bat calls", "Noise")) +
+  ylab("Proportion of recordings") + 
+  xlab("Site") +
+  theme(text = element_text(size = 10)) +
+  coord_flip() + 
+  scale_x_discrete(expand = expansion(mult = c(0.01, 0.01)))+
+  theme_minimal()
+
+ggplot(subset(noise_coast, type == "lake")) + 
+  geom_bar(aes(x= reorder(Site, autoid == "Noise", FUN = mean), fill = autoid == "Noise"), position = "fill", width = 0.9) +
+  scale_fill_manual(name = "AutoID", values = c("TRUE" = "royalblue4", "FALSE" = "olivedrab3"), labels = c("Auto-ID bat calls", "Noise")) +
+  ylab("Proportion of recordings") + 
+  xlab("Site") +
+  theme(text = element_text(size = 10)) +
+  coord_flip() + 
+  scale_x_discrete(expand = expansion(mult = c(0.01, 0.01)))+
+  theme_minimal()
+  
+ggplot(subset(noise_coast, type == "inland")) + 
+  geom_bar(aes(x= reorder(Site, autoid == "Noise", FUN = mean), fill = autoid == "Noise"), position = "fill", width = 0.9) +
+  scale_fill_manual(name = "AutoID", values = c("TRUE" = "royalblue4", "FALSE" = "olivedrab3"), labels = c("Auto-ID bat calls", "Noise")) +
+  ylab("Proportion of recordings") + 
+  xlab("Site") +
+  theme(text = element_text(size = 10)) +
+  coord_flip() + 
+  scale_x_discrete(expand = expansion(mult = c(0.01, 0.01)))+
+  theme_minimal()
+
+```
+
+If we look at the total amount of 5 second recordings on @fig-total , then the amount of noise varies less, with CM-12 being an extra noisy location. The best overview of how locations differ gives @fig-noisecall. We can see that the number of recordings we can work with is times bigger in lake sites than in coastal sites.
+
+```{r}
+#| echo: false
+#| label: fig-total
+#| warning: false
+#| fig-cap: Amount of recordings and noise
+
+# the amount of noise stays the same, some places have just more bats?
+
+ggplot(noise_coast) + 
+  geom_bar(aes(x= reorder(Site, table(Site)[Site]), fill = autoid == "Noise"), width = 0.9) +
+  scale_fill_manual(name = "AutoID", values = c("TRUE" = "royalblue4", "FALSE" = "olivedrab3"), labels = c("Auto-ID bat calls", "Noise")) +
+  ylab("Number of 5s recordings") + 
+  xlab("Site") +
+  theme(text = element_text(size = 10)) +
+  coord_flip() + 
+  scale_x_discrete(expand = expansion(mult = c(0.01, 0.01)))+
+  theme_minimal()
+
+
+
+```
+
+```{r}
+#| echo: false
+#| label: fig-noisecall
+#| warning: false
+#| fig-cap: Correlation between recordings and the amount of noise
+
+ggplot(overview_summary) +
+  aes(x = `noise_pct`, y = `batcalls`, colour = type) +
+  geom_point(size = 3.35, 
+             shape = "diamond") +
+  scale_color_viridis_d(option = "cividis", direction = 1) +
+  labs(x = "Percentage of noise files in recordings", 
+       y = "Number of recordings with bat calls", title = "Correlation between noise and bat calls", subtitle = "By location") +
+  theme_classic() +
+  theme(legend.text = element_text(face = "bold"), legend.title = element_text(face = "bold"))
+```
+
+## AUTO-ID bats
+
+While the combined auto-id says little about what species are present in what locations, mostly because auto-id is not reliable, then some species-specific auto-ids will give quite a good picture of the species' movements. 
+
+```{r}
+# plot with all auto-ids
+# plot with auto-ids and nr of recordings
+# enil plot
+# ppyg plot
+# pnat plot
+# mdau plot?
+
+
+```
+
+## Pnat activity
+
+```{r}
+# N-S location based
+# coastal vs lakes
+# 
+
+
+
+```
