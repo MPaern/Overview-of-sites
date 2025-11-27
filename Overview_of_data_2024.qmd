@@ -21,6 +21,7 @@ library(MetBrewer)
 
 overview_summary <- read.csv("overview_2024.csv")
 cm <- read.csv("cm_all_2024.csv")
+missing_dates <- read.csv("Missing dates v4.csv")
 
 ```
 
@@ -62,11 +63,72 @@ Detector dead: 33\
 
 Average time detector deployed: `r mean(overview_summary$days_active)`\
 
+## Deployment times 
+
+This is a graph that shows the days with missing data and how long the detectors were in the field.
+
+```{r preparing missing dates data}
+#| echo: false
+#| warning: false
+
+complete_dates <- overview_summary |>  
+  mutate(
+    BeginDate = as.Date(date_deployed),
+    EndDate   = as.Date(date_retrieved) - 1,
+    full_dates = map2(BeginDate, EndDate, ~ seq.Date(from = .x, to = .y, by = "day"))
+  ) |> 
+  select(Site, full_dates) |> 
+  unnest(full_dates) |> 
+  rename(ExpectedDate = full_dates)
+
+available_dates <- cm %>%
+  mutate(ActualDate = as.Date(DATE.12)) %>%
+  reframe(ActualDate = unique(ActualDate), .by = "Site")
+
+available_dates <- available_dates %>%
+  mutate(Type = "Observed")
+
+missing_dates$X <- NULL
+
+missing_dates <- missing_dates %>%
+  rename(
+    Date = ExpectedDate
+  )
+
+available_dates <- available_dates %>%
+  rename(
+    Date = ActualDate
+  )
+
+missing_dates <- missing_dates %>%
+  mutate(Type = "Missing") %>% 
+  mutate(Date=ymd(Date))
+
+
+all_dates <- bind_rows(available_dates, missing_dates)
+```
+
+
+```{r missing dates plot} 
+#| echo: false
+#| label: fig-missing
+#| warning: false
+#| fig-cap: Misisng dates 2024
+#| column: page
+
+ggplot(all_dates, aes(x = Date, y = Site, color = Type)) +
+  geom_point(size = 2) +
+  scale_color_manual(values = c("Observed" = "darkgrey", "Missing" = "red")) +
+  theme_minimal() +
+  labs(title = "Observed and Missing Dates for 2024")
+
+```
+
 ## Noise
 
 @fig-noise Shows the proportion of noise in all the sites. We can see that some of the sites are a lot noisier than others and @fig-noise-compare shows that coastal sites tend to have more noise. 
 
-```{r}
+```{r noise figure 1}
 #| echo: false
 #| label: fig-noise
 #| warning: false
@@ -84,7 +146,7 @@ ggplot(cm) +
 
 ```
 
-```{r}
+```{r noise figures 2-4}
 #| echo: false
 #| label: fig-noise-compare
 #| warning: false
@@ -134,7 +196,7 @@ ggplot(subset(noise_coast, type == "inland")) +
 
 If we look at the total amount of 5 second recordings on @fig-total , then the amount of noise varies less, with CM-12 being an extra noisy location. The best overview of how locations differ gives @fig-noisecall. We can see that the number of recordings we can work with is times bigger in lake sites than in coastal sites.
 
-```{r}
+```{r noise figure 5}
 #| echo: false
 #| label: fig-total
 #| warning: false
@@ -156,7 +218,7 @@ ggplot(noise_coast) +
 
 ```
 
-```{r}
+```{r noise figure 6}
 #| echo: false
 #| label: fig-noisecall
 #| warning: false
@@ -177,9 +239,78 @@ ggplot(overview_summary) +
 
 While the combined auto-id says little about what species are present in what locations, mostly because auto-id is not reliable, then some species-specific auto-ids will give quite a good picture of the species' movements. 
 
+```{r auto-id figure}
+#| echo: false
+#| label: fig-autoid
+#| warning: false
+#| fig-cap: Amount of bat calls
+
+auto_id_data <- cm[,c(10,13, 15, 16)]
+auto_id_data$type <- overview_summary$type[match(auto_id_data$Site, overview_summary$Site)]
+
+ggplot(auto_id_data %>% filter(autoid != "Noise")) + 
+  geom_bar(aes(x= reorder(Site, table(Site)[Site]), fill = autoid)) +
+  scale_fill_manual(name = "AutoID", values = met.brewer("Signac", n = 13)) + 
+  ylab("Number of 5s KPRO files") + 
+  xlab("Site") +
+  scale_x_discrete(expand = expansion(mult = c(0.01, 0.01)))+
+  coord_flip() +
+  theme(text = element_text(size = 10)) + 
+  theme_minimal()
+
+```
+```{r autoid 3 plots}
+#| echo: false
+#| label: fig-autoid-compare
+#| warning: false
+#| fig-cap: Comparison of autoid in different sites
+#| fig-subcap:
+#| - "AutoID on coast"
+#| - "AutoID around lakes"
+#| - "AutoID inland"
+#| layout-ncol: 3
+#| column: page
+
+ggplot(auto_id_data %>% 
+  filter(autoid != "Noise",
+          type == "coast")) + 
+  geom_bar(aes(x= reorder(Site, table(Site)[Site]), fill = autoid)) +
+  scale_fill_manual(name = "AutoID", values = met.brewer("Signac", n = 13)) + 
+  ylab("Proportion of recordings") + 
+  xlab("Site") +
+  theme(text = element_text(size = 10)) +
+  coord_flip() + 
+  scale_x_discrete(expand = expansion(mult = c(0.01, 0.01)))+
+  theme_minimal()
+
+ggplot(auto_id_data %>% 
+  filter(autoid != "Noise",
+          type == "lake")) + 
+  geom_bar(aes(x= reorder(Site, table(Site)[Site]), fill = autoid)) +
+  scale_fill_manual(name = "AutoID", values = met.brewer("Signac", n = 13)) + 
+  ylab("Proportion of recordings") + 
+  xlab("Site") +
+  theme(text = element_text(size = 10)) +
+  coord_flip() + 
+  scale_x_discrete(expand = expansion(mult = c(0.01, 0.01)))+
+  theme_minimal()
+  
+ggplot(auto_id_data %>% 
+  filter(autoid != "Noise",
+          type == "inland")) + 
+  geom_bar(aes(x= reorder(Site, table(Site)[Site]), fill = autoid)) +
+  scale_fill_manual(name = "AutoID", values = met.brewer("Signac", n = 13)) + 
+  ylab("Proportion of recordings") + 
+  xlab("Site") +
+  theme(text = element_text(size = 10)) +
+  coord_flip() + 
+  scale_x_discrete(expand = expansion(mult = c(0.01, 0.01)))+
+  theme_minimal()
+
+```
+
+
 ```{r}
-# plot with all auto-ids
-# plot with auto-ids and nr of recordings
 # enil plot
 # ppyg plot
 # pnat plot
