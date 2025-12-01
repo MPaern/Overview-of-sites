@@ -5,7 +5,7 @@ format: html
 editor: visual
 ---
 
-```{r}
+```{r setup}
 #| echo: false
 #| warning: false
 
@@ -16,6 +16,10 @@ library(ggplot2)
 library(dplyr)
 library(lubridate)
 library(MetBrewer)
+library(hms)
+library(leaflet.minicharts)
+library(leaflet)
+
 
 # read necessary data in
 
@@ -64,10 +68,6 @@ Detector dead: 33\
 
 Average time detector deployed: `r mean(overview_summary$days_active)`\
 
-## Deployment times 
-
-This is a graph that shows the days with missing data and how long the detectors were in the field.
-
 ```{r preparing missing dates data}
 #| echo: false
 #| warning: false
@@ -109,7 +109,7 @@ missing_dates <- missing_dates %>%
 all_dates <- bind_rows(available_dates, missing_dates)
 ```
 
-```{r all data preparation for plots in this document}
+```{r data preparation for plots in this document}
 # missing dates plot
   # add type NoData (aka no recordings) to Observed and Missing
 
@@ -128,8 +128,6 @@ all_dates <- all_dates |>
   left_join(NoData, by = c("Site", "Date"), suffix = c("", "_new")) |> 
   mutate(Type = if_else(!is.na(Type_new), Type_new, Type)) |> 
   select(-Type_new)
-
-  #start date and end date to date.12?
 
 # noise plot
 
@@ -154,6 +152,57 @@ cm$type <- overview_summary$type[match(cm$Site, overview_summary$Site)]
 
 ```
 
+```{r pnat data preparation}
+# choose PIPNAT
+
+cm_pnat <- cm %>%
+  filter(autoid == "PIPNAT") 
+
+cm_pnat_c <- cm_pnat |>
+  filter(type == "coast") %>%
+  filter(month(DATE.12) %in% c(8, 9, 10))
+
+# add median dates
+
+median(cm_pnat_c$DATE.12, na.rm = FALSE)
+
+median_dates <- cm_pnat_c %>%
+  group_by(Site) %>%
+  summarise(median = median(DATE.12, na.rm = TRUE))
+
+median_dates$latitude <-overview_summary$latitude[match(median_dates$Site, overview_summary$Site)]
+
+median_dates <- median_dates %>%
+  arrange(latitude) %>%
+  mutate(Site = factor(Site, levels = Site))
+
+cm_pnat_c <- cm_pnat_c %>%
+  mutate(TIME=as_hms(TIME))
+
+cm_pnat_c <- cm_pnat_c %>%
+  mutate(TIME.12=as_hms(TIME.12))
+
+# half a month
+
+cm_pnat_c <- cm_pnat_c %>%
+  mutate(
+    HalfMonth = case_when(
+      lubridate::day(DATE) <= 15 ~
+        paste0(lubridate::year(DATE), "-", sprintf("%02d", lubridate::month(DATE)), "-H1"),
+      TRUE ~
+        paste0(lubridate::year(DATE), "-", sprintf("%02d", lubridate::month(DATE)), "-H2")
+    )
+  )
+
+#check for duplicates
+  #dim(cm_pnat_c[duplicated(cm_pnat_c$filename),])[1]
+
+```
+
+
+## Deployment times 
+
+This is a graph that shows the days with missing data and how long the detectors were in the field.
 
 ```{r missing dates plot} 
 #| echo: false
@@ -626,30 +675,11 @@ ggplot(cm %>%
     theme_minimal()
 ```
 
-Nathusius' pipistrelle activity on the coast N to S by median activity in August and September. 
+## Nathusius' pipistrelle distribution 
+
+Nathusius' pipistrelle median activity on the coastal sites from N to S by from August to retrieval. 
 
 ```{r pnat lat}
-
-# choose PIPNAT
-
-cm_pnat <- cm %>%
-  filter(autoid == "PIPNAT") %>%
-  filter(type == "coast") %>%
-  filter(month(DATE.12) %in% c(8, 9))
-
-# add median dates
-
-median(cm_pnat$DATE.12, na.rm = FALSE)
-
-median_dates <- cm_pnat %>%
-  group_by(Site) %>%
-  summarise(median = median(DATE.12, na.rm = TRUE))
-
-median_dates$latitude <-overview_summary$latitude[match(median_dates$Site, overview_summary$Site)]
-
-median_dates <- median_dates %>%
-  arrange(latitude) %>%
-  mutate(Site = factor(Site, levels = Site))
 
 ggplot(median_dates) +
   aes(x = `median`, y = `Site`) +
@@ -657,8 +687,54 @@ ggplot(median_dates) +
              shape = "diamond") +
   scale_color_viridis_d(option = "cividis", direction = 1) +
   labs(x = "Median activity date", 
-       y = "Site from N to S", title = "Activity in Aug-Sept", subtitle = "By location") +
+       y = "Site", title = "Median activity by site", subtitle = "From N to S") +
   theme_classic() +
   theme(legend.text = element_text(face = "bold"), legend.title = element_text(face = "bold"))
 
+ggplot(cm_pnat_c) +
+  aes(x = DATE.12) +
+  geom_histogram(bins = 30L, fill = "#112446") +
+  theme_minimal() +
+  facet_wrap(vars(Site))
+
+
 ```
+
+Diurnal activity patterns on the coast every half month from August to October.
+
+```{r diur act pnat}
+cm_pnat_c %>%
+ filter(DATE.12 >= "2024-08-01" & DATE.12 <= "2024-10-15") %>%
+ ggplot() +
+  aes(x = HOUR.12) +
+  geom_histogram(bins = 30L, fill = "#112446") +
+  theme_minimal() +
+  facet_wrap(vars(DATE))
+
+cm_pnat_c %>%
+  filter(DATE.12 >= "2024-08-01",
+         DATE.12 <= "2024-10-15") %>%
+  ggplot(aes(x = HOUR.12)) +
+  geom_histogram(bins = 30, fill = "#112446") +
+  theme_minimal() +
+  facet_wrap(vars(HalfMonth))
+
+```
+
+```{r pnat map}
+
+tilesURL <- "http://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}"
+
+basemap <- leaflet(width = "100%", height = "400px") %>%
+  addTiles(tilesURL)
+
+basemap %>%
+  addMinicharts(
+    overview_summary$longitude, overview_summary$latitude,
+    chartdata = overview_summary$pnatcalls, 
+    showLabels = TRUE,
+    width = 45
+  )
+```
+
+
