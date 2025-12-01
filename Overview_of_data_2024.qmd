@@ -22,6 +22,7 @@ library(MetBrewer)
 overview_summary <- read.csv("overview_2024.csv")
 cm <- read.csv("cm_all_2024.csv")
 missing_dates <- read.csv("Missing dates v4.csv")
+missing_2024 <- read.csv("2024_missing_vetted.csv")
 
 ```
 
@@ -108,19 +109,66 @@ missing_dates <- missing_dates %>%
 all_dates <- bind_rows(available_dates, missing_dates)
 ```
 
+```{r all data preparation for plots in this document}
+# missing dates plot
+  # add type NoData (aka no recordings) to Observed and Missing
+
+missing_2024 <- missing_2024 %>%
+  mutate(ExpectedDate=mdy(ExpectedDate))
+
+NoData <-  missing_2024 |> 
+  filter(Battery.status == "OK", SD.card.status == "OK") |> 
+  select(Site, ExpectedDate) |> 
+  rename(
+    Date = ExpectedDate
+  ) |> 
+  data.frame(Type = "NoData")
+
+all_dates <- all_dates |> 
+  left_join(NoData, by = c("Site", "Date"), suffix = c("", "_new")) |> 
+  mutate(Type = if_else(!is.na(Type_new), Type_new, Type)) |> 
+  select(-Type_new)
+
+  #start date and end date to date.12?
+
+# noise plot
+
+noise_coast <- cm[,c(13,16)]
+noise_coast$type <- overview_summary$type[match(noise_coast$Site, overview_summary$Site)]
+
+# autoid plot
+
+auto_id_data <- cm[,c(10,13, 15, 16)]
+auto_id_data$type <- overview_summary$type[match(auto_id_data$Site, overview_summary$Site)]
+
+# combined bat calls plot
+
+cm <- cm %>%
+  mutate(DATE.12=ymd(DATE.12))
+
+# activity plot
+  # adding a column "type"
+
+cm$type <- overview_summary$type[match(cm$Site, overview_summary$Site)]
+
+
+```
+
 
 ```{r missing dates plot} 
 #| echo: false
 #| label: fig-missing
 #| warning: false
-#| fig-cap: Misisng dates 2024
+#| fig-cap: Missing dates 2024
 #| column: page
 
 ggplot(all_dates, aes(x = Date, y = Site, color = Type)) +
   geom_point(size = 2) +
-  scale_color_manual(values = c("Observed" = "darkgrey", "Missing" = "red")) +
+  scale_color_manual(values = c("Observed" = "darkgrey", "NoData" = "darkgrey", "Missing" = "red")) +
   theme_minimal() +
+  scale_y_discrete(expand = expansion(mult = c(0.01, 0.01)))+
   labs(title = "Observed and Missing Dates for 2024")
+
 
 ```
 
@@ -157,10 +205,6 @@ ggplot(cm) +
 #| - "Noise inland"
 #| layout-ncol: 3
 #| column: page
-
-
-noise_coast <- cm[,c(13,16)]
-noise_coast$type <- overview_summary$type[match(noise_coast$Site, overview_summary$Site)]
 
 ggplot(subset(noise_coast, type == "coast")) + 
   geom_bar(aes(x= reorder(Site, autoid == "Noise", FUN = mean), fill = autoid == "Noise"), position = "fill", width = 0.9) +
@@ -249,9 +293,6 @@ While the combined auto-id @fig-autoid doesn't give us a very detailed picture o
 #| warning: false
 #| fig-cap: Amount of bat calls
 
-auto_id_data <- cm[,c(10,13, 15, 16)]
-auto_id_data$type <- overview_summary$type[match(auto_id_data$Site, overview_summary$Site)]
-
 ggplot(auto_id_data %>% filter(autoid != "Noise")) + 
   geom_bar(aes(x= reorder(Site, table(Site)[Site]), fill = autoid)) +
   scale_fill_manual(name = "AutoID", values = met.brewer("Signac", n = 13)) + 
@@ -324,9 +365,6 @@ We can see on @fig-bat-calls that in September, the amount of calls recorded, st
 #| warning: false
 #| fig-cap: Amount of bat calls
 
-cm <- cm %>%
-  mutate(DATE.12=ymd(DATE.12))
-
 ggplot(cm %>% 
     filter(autoid != "Noise") %>% 
     droplevels(), aes(x= DATE.12, color = taxa)) + 
@@ -351,9 +389,6 @@ ggplot(cm %>%
 #| - "Activity inland"
 #| layout-ncol: 3
 #| column: page
-
-# adding a column "type"
-cm$type <- overview_summary$type[match(cm$Site, overview_summary$Site)]
 
 ggplot(cm %>% 
     filter(autoid != "Noise",
@@ -405,6 +440,7 @@ ggplot(cm %>%
 
 
 ```
+
 ```{r enil 3}
 #| echo: false
 #| label: fig-enil-3
