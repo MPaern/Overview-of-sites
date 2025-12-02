@@ -736,7 +736,7 @@ basemap %>%
   )
 ```
 
-The median date of activity did not differ that much based on the location, as is seen on a @fig-pnat-map-ns below.
+The median date of activity did not differ that much based on the location, as is seen on a @fig-pnat-ns below.
 
 ```{r pnat lat map}
 #| echo: false
@@ -783,7 +783,7 @@ basemap %>%
 
 ```{r pnat lat}
 #| echo: false
-#| label: fig-pnat-map-ns
+#| label: fig-pnat-ns
 #| warning: false
 #| fig-cap: Distribution of Pnat calls per site
 
