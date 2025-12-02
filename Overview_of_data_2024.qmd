@@ -19,6 +19,7 @@ library(MetBrewer)
 library(hms)
 library(leaflet.minicharts)
 library(leaflet)
+library(tidyr)
 
 
 # read necessary data in
@@ -42,9 +43,9 @@ Number of detectors that survived the season: 48\
 
 Reasons of detector failure: Water damage by humans, seawater damage by other forces\
 
-Date of first deployment:`r min(overview_summary$date_deployed)`\
+Date of first deployment: `r min(overview_summary$date_deployed)`\
 
-Date of last deployment:`r max(overview_summary$date_deployed)`\
+Date of last deployment: `r max(overview_summary$date_deployed)`\
 
 Date of first retrieval: `r min(overview_summary$date_retrieved)`\
 
@@ -52,19 +53,19 @@ Date of last retrieval: `r max(overview_summary$date_retrieved)`\
 
 Days detectors were on the field: 4908\
 
-Days with missing data: 320 or 319\
+Days with missing data: 318\
 
 \% of missing data from all data: ca 6,5\
 
 Reasons of missing data:\
 
-1\) No bats, no noise detected: 19\
+1\) No bats, no noise detected (later Nodata): 19\
 
 2\) SD card full: 238\
 
-Batteries empty: 23\
+3\) Batteries empty: 23\
 
-Detector dead: 33\
+4\) Detector dead: 33\
 
 Average time detector deployed: `r mean(overview_summary$days_active)`\
 
@@ -110,6 +111,9 @@ all_dates <- bind_rows(available_dates, missing_dates)
 ```
 
 ```{r data preparation for plots in this document}
+#| echo: false
+#| warning: false
+
 # missing dates plot
   # add type NoData (aka no recordings) to Observed and Missing
 
@@ -153,6 +157,9 @@ cm$type <- overview_summary$type[match(cm$Site, overview_summary$Site)]
 ```
 
 ```{r pnat data preparation}
+#| echo: false
+#| warning: false
+
 # choose PIPNAT
 
 cm_pnat <- cm %>%
@@ -164,7 +171,24 @@ cm_pnat_c <- cm_pnat |>
 
 # add median dates
 
-median(cm_pnat_c$DATE.12, na.rm = FALSE)
+median_dates_all <- cm_pnat %>%
+  group_by(Site) %>%
+  summarise(median = median(DATE.12, na.rm = TRUE))
+
+median_dates_all$latitude <-overview_summary$latitude[match(median_dates_all$Site, overview_summary$Site)]
+
+median_dates_all <- median_dates_all %>%
+  arrange(latitude) %>%
+  mutate(Site = factor(Site, levels = Site))
+
+cm_pnat_c <- cm_pnat_c %>%
+  mutate(TIME=as_hms(TIME))
+
+cm_pnat_c <- cm_pnat_c %>%
+  mutate(TIME.12=as_hms(TIME.12))
+
+
+# median(cm_pnat_c$DATE.12, na.rm = FALSE)
 
 median_dates <- cm_pnat_c %>%
   group_by(Site) %>%
@@ -197,6 +221,8 @@ cm_pnat_c <- cm_pnat_c %>%
 #check for duplicates
   #dim(cm_pnat_c[duplicated(cm_pnat_c$filename),])[1]
 
+# 
+
 ```
 
 
@@ -209,7 +235,6 @@ This is a graph that shows the days with missing data and how long the detectors
 #| label: fig-missing
 #| warning: false
 #| fig-cap: Missing dates 2024
-#| column: page
 
 ggplot(all_dates, aes(x = Date, y = Site, color = Type)) +
   geom_point(size = 2) +
@@ -223,7 +248,7 @@ ggplot(all_dates, aes(x = Date, y = Site, color = Type)) +
 
 ## Noise
 
-@fig-noise Shows the proportion of noise in all the sites. We can see that some of the sites are a lot noisier than others and @fig-noise-compare shows that coastal sites tend to have more noise. 
+@fig-noise Shows the proportion of noise in all the sites. We can see that some of the sites are a lot noisier than others. Coastal sites tend to have more noise, but it varies from 20% (CM-27, sheltered by Kvassheim lighthouse) to 99% (Utsira-2). From lakesites, the most noise was 78% (CM-14, lake in Lista) and the least 11% (CM-34, guitarmuseum).
 
 ```{r noise figure 1}
 #| echo: false
@@ -245,6 +270,7 @@ ggplot(cm) +
 
 ```{r noise figures 2-4}
 #| echo: false
+#| eval: false
 #| label: fig-noise-compare
 #| warning: false
 #| fig-cap: Comparison of noise in different sites
@@ -287,10 +313,10 @@ ggplot(subset(noise_coast, type == "inland")) +
 
 ```
 
-If we look at the total amount of 5 second recordings on @fig-total , then the amount of noise varies less, with CM-12 being an extra noisy location. The best overview of how locations differ gives @fig-noisecall. We can see that the number of recordings we can work with is times bigger in lake sites than in coastal sites. 
+If we look at the total amount of 5 second recordings on @fig-total, then the amount of noise varies less, with CM-12 (coast near Lista) being an extra noisy location. The best overview of how locations differ gives @fig-noisecall. We can see that the number of recordings we can work with is times bigger in lake sites than in coastal sites. 
 
 In terms of how to distribute sites to different classes, I have made a third, "inland" class that doesn't really fit under the two others, with CM-01 (Utsira lighthouse), CM-07 (Raulemyra) and CM-41 (NMBU campus). Coastal sites are sites up to 400m from the coast, the furthest away being CM-25 near Brusand with 380 meters. There is also one lake site that falls into the 400m cutoff, CM-34 (Guitarmuseum) that is 280m from the coast. 
-As for the inland sites, CM-01 is 600m from the coast and 480m from a freshwater lake, CM-07 is 9000m from the coast and 230m from a bigger freshwater source, CM-41 is 2230m from the coast and 100m from a bigger freshwater source. 
+As for the inland sites, CM-01 is 600m from the coast and 480m from a freshwater lake, CM-07 is 9000m from the coast and 230m from a bigger freshwater source (wider part of a stream), CM-41 is 2230m from the coast and 100m from a bigger freshwater source (wider part of a stream). 
 
 
 ```{r noise figure 5}
@@ -334,7 +360,9 @@ ggplot(overview_summary) +
 
 ## AUTO-ID bats
 
-While the combined auto-id @fig-autoid doesn't give us a very detailed picture of what species are present, we can still get a proxy of the amount of recordings and species from it. When we compare the coast and the lakes, we can see that the amount of calls differs a lot (@fig-autoid-compare). Out of the top 4 coastal locations, top 2 are next to big rivers (Obrestad Prestegård, Brusand), third one is a fjord that looks like a lake (Framvaren) and fourth one is very sheltered from the sea (Stapnes bedehus).
+While the combined auto-id @fig-autoid doesn't give us a very detailed picture of what species are present, we can still get a proxy of the amount of recordings and species from it. When we compare the coast and the lakes, we can see that the amount of calls differs a lot (@fig-autoid-compare). \
+Out of the top 4 coastal locations, top 2 are next to big rivers (Obrestad Prestegård, Brusand), third one is a fjord that looks like a lake (Framvaren) and fourth one is very sheltered from the sea (Stapnes bedehus). \
+CM-46 is the only lake site in a wind farm, but the low number of detections may be due to other reasons.
 
 ```{r auto-id figure}
 #| echo: false
@@ -371,7 +399,7 @@ ggplot(auto_id_data %>%
           type == "coast")) + 
   geom_bar(aes(x= reorder(Site, table(Site)[Site]), fill = autoid)) +
   scale_fill_manual(name = "AutoID", values = met.brewer("Signac", n = 13)) + 
-  ylab("Proportion of recordings") + 
+  ylab("Number of 5s KPRO files") + 
   xlab("Site") +
   theme(text = element_text(size = 10)) +
   coord_flip() + 
@@ -383,7 +411,7 @@ ggplot(auto_id_data %>%
           type == "lake")) + 
   geom_bar(aes(x= reorder(Site, table(Site)[Site]), fill = autoid)) +
   scale_fill_manual(name = "AutoID", values = met.brewer("Signac", n = 13)) + 
-  ylab("Proportion of recordings") + 
+  ylab("Number of 5s KPRO files") + 
   xlab("Site") +
   theme(text = element_text(size = 10)) +
   coord_flip() + 
@@ -395,7 +423,7 @@ ggplot(auto_id_data %>%
           type == "inland")) + 
   geom_bar(aes(x= reorder(Site, table(Site)[Site]), fill = autoid)) +
   scale_fill_manual(name = "AutoID", values = met.brewer("Signac", n = 13)) + 
-  ylab("Proportion of recordings") + 
+  ylab("Number of 5s KPRO files") + 
   xlab("Site") +
   theme(text = element_text(size = 10)) +
   coord_flip() + 
@@ -404,9 +432,9 @@ ggplot(auto_id_data %>%
 
 ```
 
-## Occurrance of calls
+## Timing of calls
 
-We can see on @fig-bat-calls that in September, the amount of calls recorded, starts to drop. The very beginning of the graph and end on the graph show that not all the detectors were out, that's why the amount of calls was lower. 
+We can see on @fig-bat-calls that in September, the total amount of calls recorded starts to drop. We have to bear in mind here that the beginning and end og the graph is lower because the detectors were put up and taken down not all at once.
 
 ```{r combined plot}
 #| echo: false
@@ -470,13 +498,15 @@ ggplot(cm %>%
     theme_minimal()
 ```
 
-Over all the sites, the northern bat activity 
+### Northern bat activity 
+
+We can see a high level of avtivity throughout the recording period up until the beginning of september, when activity suddenly drops.
 
 ```{r enil}
 #| echo: false
 #| label: fig-enil
 #| warning: false
-#| fig-cap: Enil calls
+#| fig-cap: AUTO-ID Enil calls
 
 ggplot(cm %>% 
     filter(autoid == "EPTNIL") %>% 
@@ -535,7 +565,9 @@ ggplot(cm %>%
 
 ```
 
-Over all the sites, the nathusius' pipistrelle activity 
+### Nathusius' pipistrelle activity 
+
+We can see that in our sites, the activity peaks in September.
 
 ```{r pnat}
 #| echo: false
@@ -548,7 +580,7 @@ ggplot(cm %>%
     droplevels(), aes(x= DATE.12, color = taxa)) + 
   stat_count( geom = "point", size= 4, alpha = 0.90, color = "royalblue") +
     ylab("Recordings per night") + xlab("Month") +
-   ggtitle("Overall activity") +
+   ggtitle("Overall amount of calls") +
     scale_x_date(date_breaks = "1 month", date_labels = "%b") +
     theme_minimal()
 ```
@@ -596,7 +628,10 @@ ggplot(cm %>%
     scale_x_date(date_breaks = "1 month", date_labels = "%b") +
     theme_minimal()
 ```
-Over all the sites, the soprano pipistrelle activity 
+
+### Soprano pipistrelle activity 
+
+Activity is higher leading up to the September peak, but we can still clearly see a peak that occurs earlier than that of Nathusius’ pipistrelles.
 
 ```{r ppyg}
 #| echo: false
@@ -657,7 +692,8 @@ ggplot(cm %>%
     scale_x_date(date_breaks = "1 month", date_labels = "%b") +
     theme_minimal()
 ```
-Over all the sites, the daubentons' bat activity 
+
+### Daubentons' bat activity 
 
 ```{r mdau}
 #| echo: false
@@ -675,21 +711,102 @@ ggplot(cm %>%
     theme_minimal()
 ```
 
+
 ## Nathusius' pipistrelle distribution 
 
-Nathusius' pipistrelle median activity on the coastal sites from N to S by from August to retrieval. 
+On the study area, some sites had clearly higher amounts of nathusius' pipistrelles. On the @fig-pnat-map below, we can see how many 5s clips of Auto-ID Pnat we had per site. 
+
+```{r pnat map}
+#| echo: false
+#| label: fig-pnat-map
+#| warning: false
+#| fig-cap: Number of Pnat calls per site
+
+tilesURL <- "http://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}"
+
+basemap <- leaflet(width = "100%", height = "400px") %>%
+  addTiles(tilesURL)
+
+basemap %>%
+  addMinicharts(
+    overview_summary$longitude, overview_summary$latitude,
+    chartdata = overview_summary$pnatcalls, 
+    showLabels = TRUE,
+    width = 45
+  )
+```
+
+The median date of activity did not differ that much based on the location, as is seen on a @fig-pnat-map-ns below.
+
+```{r pnat lat map}
+#| echo: false
+#| eval: false
+#| label: fig-pnat-map-ns
+#| warning: false
+#| fig-cap: Timing of Pnat calls per site
+
+# data per day for recordings by site 
+pnat_day <- cm_pnat %>%
+  count(Site, DATE.12) %>%      # counts rows for each combination
+  pivot_wider(
+    names_from = DATE.12,
+    values_from = n,
+    values_fill = 0             # fill missing with 0
+  )
+
+# Reorder date columns
+date_cols <- setdiff(names(pnat_day), "Site")  # All columns except site
+
+# Convert column names to Date
+ordered_cols <- date_cols[order(as.Date(date_cols))]
+
+# Rebuild data frame with columns in date order
+pnat_day <- pnat_day %>%
+  select(Site, all_of(ordered_cols))
+
+# add columns lat and long
+pnat_day$lat <- overview_summary$latitude[match(pnat_day$Site, overview_summary$Site)]
+pnat_day$long <- overview_summary$longitude[match(pnat_day$Site, overview_summary$Site)]
+
+newdf <- pnat_day %>% select(-Site, -lat, -long)
+
+
+
+basemap %>%
+  addMinicharts(pnat_day$long, pnat_day$lat,
+    chartdata= newdf,
+    width = 45, height = 45
+  )
+
+
+```
 
 ```{r pnat lat}
+#| echo: false
+#| label: fig-pnat-map-ns
+#| warning: false
+#| fig-cap: Distribution of Pnat calls per site
 
-ggplot(median_dates) +
+# remove sites that have no data in Sept: 33, 37,47,48
+
+median_dates_all <- median_dates_all %>%
+  filter(!Site %in% c("CM-33", "CM-37", "CM-47", "CM-48"))
+
+ggplot(median_dates_all) +
   aes(x = `median`, y = `Site`) +
   geom_point(size = 3.35, 
-             shape = "diamond") +
-  scale_color_viridis_d(option = "cividis", direction = 1) +
+             shape = "diamond", colour = "darkblue") +
   labs(x = "Median activity date", 
        y = "Site", title = "Median activity by site", subtitle = "From N to S") +
   theme_classic() +
   theme(legend.text = element_text(face = "bold"), legend.title = element_text(face = "bold"))
+
+```
+
+```{r diur act pnat}
+#| eval: false
+#| echo: false
+#| warning: false
 
 ggplot(cm_pnat_c) +
   aes(x = DATE.12) +
@@ -697,12 +814,6 @@ ggplot(cm_pnat_c) +
   theme_minimal() +
   facet_wrap(vars(Site))
 
-
-```
-
-Diurnal activity patterns on the coast every half month from August to October.
-
-```{r diur act pnat}
 cm_pnat_c %>%
  filter(DATE.12 >= "2024-08-01" & DATE.12 <= "2024-10-15") %>%
  ggplot() +
@@ -720,21 +831,3 @@ cm_pnat_c %>%
   facet_wrap(vars(HalfMonth))
 
 ```
-
-```{r pnat map}
-
-tilesURL <- "http://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}"
-
-basemap <- leaflet(width = "100%", height = "400px") %>%
-  addTiles(tilesURL)
-
-basemap %>%
-  addMinicharts(
-    overview_summary$longitude, overview_summary$latitude,
-    chartdata = overview_summary$pnatcalls, 
-    showLabels = TRUE,
-    width = 45
-  )
-```
-
-
