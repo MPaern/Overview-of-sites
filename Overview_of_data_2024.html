@@ -21,41 +21,6 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
-/* CSS for syntax highlighting */
-html { -webkit-text-size-adjust: 100%; }
-pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
-pre > code.sourceCode > span:empty { height: 1.2em; }
-.sourceCode { overflow: visible; }
-code.sourceCode > span { color: inherit; text-decoration: inherit; }
-div.sourceCode { margin: 1em 0; }
-pre.sourceCode { margin: 0; }
-@media screen {
-div.sourceCode { overflow: auto; }
-}
-@media print {
-pre > code.sourceCode { white-space: pre-wrap; }
-pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
-}
-pre.numberSource code
-  { counter-reset: source-line 0; }
-pre.numberSource code > span
-  { position: relative; left: -4em; counter-increment: source-line; }
-pre.numberSource code > span > a:first-child::before
-  { content: counter(source-line);
-    position: relative; left: -1em; text-align: right; vertical-align: baseline;
-    border: none; display: inline-block;
-    -webkit-touch-callout: none; -webkit-user-select: none;
-    -khtml-user-select: none; -moz-user-select: none;
-    -ms-user-select: none; user-select: none;
-    padding: 0 4px; width: 4em;
-  }
-pre.numberSource { margin-left: 3em;  padding-left: 4px; }
-div.sourceCode
-  {   }
-@media screen {
-pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
-}
 </style>
 
 
@@ -140,9 +105,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </p>
 <p>Reasons of detector failure: Water damage by humans, seawater damage by other forces<br>
 </p>
-<p>Date of first deployment:2024-06-14 11:46:00<br>
+<p>Date of first deployment: 2024-06-14 11:46:00<br>
 </p>
-<p>Date of last deployment:2024-07-20 08:33:00<br>
+<p>Date of last deployment: 2024-07-20 08:33:00<br>
 </p>
 <p>Date of first retrieval: 2024-08-16 12:11:03<br>
 </p>
@@ -150,120 +115,33 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </p>
 <p>Days detectors were on the field: 4908<br>
 </p>
-<p>Days with missing data: 320 or 319<br>
+<p>Days with missing data: 318<br>
 </p>
 <p>% of missing data from all data: ca 6,5<br>
 </p>
 <p>Reasons of missing data:<br>
 </p>
-<p>1) No bats, no noise detected: 19<br>
+<p>1) No bats, no noise detected (later Nodata): 19<br>
 </p>
 <p>2) SD card full: 238<br>
 </p>
-<p>Batteries empty: 23<br>
+<p>3) Batteries empty: 23<br>
 </p>
-<p>Detector dead: 33<br>
+<p>4) Detector dead: 33<br>
 </p>
 <p>Average time detector deployed: 91.84<br>
 </p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># missing dates plot</span></span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  <span class="co"># add type NoData (aka no recordings) to Observed and Missing</span></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>missing_2024 <span class="ot">&lt;-</span> missing_2024 <span class="sc">%&gt;%</span></span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">ExpectedDate=</span><span class="fu">mdy</span>(ExpectedDate))</span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>NoData <span class="ot">&lt;-</span>  missing_2024 <span class="sc">|&gt;</span> </span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(Battery.status <span class="sc">==</span> <span class="st">"OK"</span>, SD.card.status <span class="sc">==</span> <span class="st">"OK"</span>) <span class="sc">|&gt;</span> </span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(Site, ExpectedDate) <span class="sc">|&gt;</span> </span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename</span>(</span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">Date =</span> ExpectedDate</span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span> </span>
-<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">data.frame</span>(<span class="at">Type =</span> <span class="st">"NoData"</span>)</span>
-<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>all_dates <span class="ot">&lt;-</span> all_dates <span class="sc">|&gt;</span> </span>
-<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(NoData, <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"Site"</span>, <span class="st">"Date"</span>), <span class="at">suffix =</span> <span class="fu">c</span>(<span class="st">""</span>, <span class="st">"_new"</span>)) <span class="sc">|&gt;</span> </span>
-<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Type =</span> <span class="fu">if_else</span>(<span class="sc">!</span><span class="fu">is.na</span>(Type_new), Type_new, Type)) <span class="sc">|&gt;</span> </span>
-<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>Type_new)</span>
-<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a><span class="co"># noise plot</span></span>
-<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>noise_coast <span class="ot">&lt;-</span> cm[,<span class="fu">c</span>(<span class="dv">13</span>,<span class="dv">16</span>)]</span>
-<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>noise_coast<span class="sc">$</span>type <span class="ot">&lt;-</span> overview_summary<span class="sc">$</span>type[<span class="fu">match</span>(noise_coast<span class="sc">$</span>Site, overview_summary<span class="sc">$</span>Site)]</span>
-<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a><span class="co"># autoid plot</span></span>
-<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>auto_id_data <span class="ot">&lt;-</span> cm[,<span class="fu">c</span>(<span class="dv">10</span>,<span class="dv">13</span>, <span class="dv">15</span>, <span class="dv">16</span>)]</span>
-<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>auto_id_data<span class="sc">$</span>type <span class="ot">&lt;-</span> overview_summary<span class="sc">$</span>type[<span class="fu">match</span>(auto_id_data<span class="sc">$</span>Site, overview_summary<span class="sc">$</span>Site)]</span>
-<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a><span class="co"># combined bat calls plot</span></span>
-<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>cm <span class="ot">&lt;-</span> cm <span class="sc">%&gt;%</span></span>
-<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">DATE.12=</span><span class="fu">ymd</span>(DATE<span class="fl">.12</span>))</span>
-<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a><span class="co"># activity plot</span></span>
-<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a>  <span class="co"># adding a column "type"</span></span>
-<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a>cm<span class="sc">$</span>type <span class="ot">&lt;-</span> overview_summary<span class="sc">$</span>type[<span class="fu">match</span>(cm<span class="sc">$</span>Site, overview_summary<span class="sc">$</span>Site)]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># choose PIPNAT</span></span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>cm_pnat <span class="ot">&lt;-</span> cm <span class="sc">%&gt;%</span></span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(autoid <span class="sc">==</span> <span class="st">"PIPNAT"</span>) </span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>cm_pnat_c <span class="ot">&lt;-</span> cm_pnat <span class="sc">|&gt;</span></span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(type <span class="sc">==</span> <span class="st">"coast"</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="fu">month</span>(DATE<span class="fl">.12</span>) <span class="sc">%in%</span> <span class="fu">c</span>(<span class="dv">8</span>, <span class="dv">9</span>, <span class="dv">10</span>))</span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="co"># add median dates</span></span>
-<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a><span class="fu">median</span>(cm_pnat_c<span class="sc">$</span>DATE<span class="fl">.12</span>, <span class="at">na.rm =</span> <span class="cn">FALSE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] "2024-09-22"</code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>median_dates <span class="ot">&lt;-</span> cm_pnat_c <span class="sc">%&gt;%</span></span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(Site) <span class="sc">%&gt;%</span></span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">median =</span> <span class="fu">median</span>(DATE<span class="fl">.12</span>, <span class="at">na.rm =</span> <span class="cn">TRUE</span>))</span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>median_dates<span class="sc">$</span>latitude <span class="ot">&lt;-</span>overview_summary<span class="sc">$</span>latitude[<span class="fu">match</span>(median_dates<span class="sc">$</span>Site, overview_summary<span class="sc">$</span>Site)]</span>
-<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>median_dates <span class="ot">&lt;-</span> median_dates <span class="sc">%&gt;%</span></span>
-<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(latitude) <span class="sc">%&gt;%</span></span>
-<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Site =</span> <span class="fu">factor</span>(Site, <span class="at">levels =</span> Site))</span>
-<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>cm_pnat_c <span class="ot">&lt;-</span> cm_pnat_c <span class="sc">%&gt;%</span></span>
-<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">TIME=</span><span class="fu">as_hms</span>(TIME))</span>
-<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>cm_pnat_c <span class="ot">&lt;-</span> cm_pnat_c <span class="sc">%&gt;%</span></span>
-<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">TIME.12=</span><span class="fu">as_hms</span>(TIME<span class="fl">.12</span>))</span>
-<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a><span class="co"># half a month</span></span>
-<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>cm_pnat_c <span class="ot">&lt;-</span> cm_pnat_c <span class="sc">%&gt;%</span></span>
-<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
-<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>    <span class="at">HalfMonth =</span> <span class="fu">case_when</span>(</span>
-<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>      lubridate<span class="sc">::</span><span class="fu">day</span>(DATE) <span class="sc">&lt;=</span> <span class="dv">15</span> <span class="sc">~</span></span>
-<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a>        <span class="fu">paste0</span>(lubridate<span class="sc">::</span><span class="fu">year</span>(DATE), <span class="st">"-"</span>, <span class="fu">sprintf</span>(<span class="st">"%02d"</span>, lubridate<span class="sc">::</span><span class="fu">month</span>(DATE)), <span class="st">"-H1"</span>),</span>
-<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a>      <span class="cn">TRUE</span> <span class="sc">~</span></span>
-<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a>        <span class="fu">paste0</span>(lubridate<span class="sc">::</span><span class="fu">year</span>(DATE), <span class="st">"-"</span>, <span class="fu">sprintf</span>(<span class="st">"%02d"</span>, lubridate<span class="sc">::</span><span class="fu">month</span>(DATE)), <span class="st">"-H2"</span>)</span>
-<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a><span class="co">#check for duplicates</span></span>
-<span id="cb4-30"><a href="#cb4-30" aria-hidden="true" tabindex="-1"></a>  <span class="co">#dim(cm_pnat_c[duplicated(cm_pnat_c$filename),])[1]</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
 </section>
 </section>
-<section id="deployment-times" class="level2 page-columns page-full">
+<section id="deployment-times" class="level2">
 <h2 class="anchored" data-anchor-id="deployment-times">Deployment times</h2>
 <p>This is a graph that shows the days with missing data and how long the detectors were in the field.</p>
-<div class="cell page-columns page-full">
-<div class="cell-output-display page-columns page-full">
-<div id="fig-missing" class="quarto-float quarto-figure quarto-figure-center anchored page-columns page-full">
-<figure class="quarto-float quarto-float-fig figure page-columns page-full">
-<div aria-describedby="fig-missing-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca" class="page-columns page-full">
-<img src="Overview_of_data_2024_files/figure-html/fig-missing-1.png" class="img-fluid figure-img column-page" width="672">
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-missing" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-missing-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="Overview_of_data_2024_files/figure-html/fig-missing-1.png" class="img-fluid figure-img" width="672">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-missing-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Figure&nbsp;1: Missing dates 2024
@@ -273,9 +151,9 @@ Figure&nbsp;1: Missing dates 2024
 </div>
 </div>
 </section>
-<section id="noise" class="level2 page-columns page-full">
+<section id="noise" class="level2">
 <h2 class="anchored" data-anchor-id="noise">Noise</h2>
-<p><a href="#fig-noise" class="quarto-xref">Figure&nbsp;2</a> Shows the proportion of noise in all the sites. We can see that some of the sites are a lot noisier than others and <a href="#fig-noise-compare" class="quarto-xref">Figure&nbsp;3</a> shows that coastal sites tend to have more noise.</p>
+<p><a href="#fig-noise" class="quarto-xref">Figure&nbsp;2</a> Shows the proportion of noise in all the sites. We can see that some of the sites are a lot noisier than others. Coastal sites tend to have more noise, but it varies from 20% (CM-27, sheltered by Kvassheim lighthouse) to 99% (Utsira-2). From lakesites, the most noise was 78% (CM-14, lake in Lista) and the least 11% (CM-34, guitarmuseum).</p>
 <div class="cell">
 <div class="cell-output-display">
 <div id="fig-noise" class="quarto-float quarto-figure quarto-figure-center anchored">
@@ -290,55 +168,22 @@ Figure&nbsp;2: Proportion of noise on sites
 </div>
 </div>
 </div>
-<div id="fig-noise-compare" class="quarto-layout-panel page-columns page-full">
-<figure class="quarto-float quarto-float-fig figure page-columns page-full">
-<div aria-describedby="fig-noise-compare-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca" class="page-columns page-full">
-<div class="quarto-layout-row page-full">
-<div class="cell-output-display quarto-layout-cell-subref quarto-layout-cell page-columns page-full" data-ref-parent="fig-noise-compare" style="flex-basis: 33.3%;justify-content: flex-start;">
-<div id="fig-noise-compare-1" class="quarto-float quarto-figure quarto-figure-center anchored page-columns page-full">
-<figure class="quarto-float quarto-subfloat-fig figure page-columns page-full">
-<div aria-describedby="fig-noise-compare-1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca" class="page-columns page-full">
-<img src="Overview_of_data_2024_files/figure-html/fig-noise-compare-1.png" class="img-fluid figure-img column-page" data-ref-parent="fig-noise-compare" width="672">
+<div id="fig-noise-compare" class="quarto-layout-panel">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-noise-compare-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="quarto-layout-row">
+<div class="quarto-layout-cell" style="flex-basis: 33.3%;justify-content: flex-start;">
+<p>Comparison of noise in different sites</p>
 </div>
-<figcaption class="quarto-float-caption-bottom quarto-subfloat-caption quarto-subfloat-fig" id="fig-noise-compare-1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-(a) Noise on coast
+</div>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig quarto-uncaptioned" id="fig-noise-compare-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;3
 </figcaption>
 </figure>
 </div>
-</div>
-<div class="cell-output-display quarto-layout-cell-subref quarto-layout-cell page-columns page-full" data-ref-parent="fig-noise-compare" style="flex-basis: 33.3%;justify-content: flex-start;">
-<div id="fig-noise-compare-2" class="quarto-float quarto-figure quarto-figure-center anchored page-columns page-full">
-<figure class="quarto-float quarto-subfloat-fig figure page-columns page-full">
-<div aria-describedby="fig-noise-compare-2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca" class="page-columns page-full">
-<img src="Overview_of_data_2024_files/figure-html/fig-noise-compare-2.png" class="img-fluid figure-img column-page" data-ref-parent="fig-noise-compare" width="672">
-</div>
-<figcaption class="quarto-float-caption-bottom quarto-subfloat-caption quarto-subfloat-fig" id="fig-noise-compare-2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-(b) Noise around lakes
-</figcaption>
-</figure>
-</div>
-</div>
-<div class="cell-output-display quarto-layout-cell-subref quarto-layout-cell page-columns page-full" data-ref-parent="fig-noise-compare" style="flex-basis: 33.3%;justify-content: flex-start;">
-<div id="fig-noise-compare-3" class="quarto-float quarto-figure quarto-figure-center anchored page-columns page-full">
-<figure class="quarto-float quarto-subfloat-fig figure page-columns page-full">
-<div aria-describedby="fig-noise-compare-3-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca" class="page-columns page-full">
-<img src="Overview_of_data_2024_files/figure-html/fig-noise-compare-3.png" class="img-fluid figure-img column-page" data-ref-parent="fig-noise-compare" width="672">
-</div>
-<figcaption class="quarto-float-caption-bottom quarto-subfloat-caption quarto-subfloat-fig" id="fig-noise-compare-3-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-(c) Noise inland
-</figcaption>
-</figure>
-</div>
-</div>
-</div>
-</div>
-<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-noise-compare-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;3: Comparison of noise in different sites
-</figcaption>
-</figure>
-</div>
-<p>If we look at the total amount of 5 second recordings on <a href="#fig-total" class="quarto-xref">Figure&nbsp;4</a> , then the amount of noise varies less, with CM-12 being an extra noisy location. The best overview of how locations differ gives <a href="#fig-noisecall" class="quarto-xref">Figure&nbsp;5</a>. We can see that the number of recordings we can work with is times bigger in lake sites than in coastal sites.</p>
-<p>In terms of how to distribute sites to different classes, I have made a third, “inland” class that doesn’t really fit under the two others, with CM-01 (Utsira lighthouse), CM-07 (Raulemyra) and CM-41 (NMBU campus). Coastal sites are sites up to 400m from the coast, the furthest away being CM-25 near Brusand with 380 meters. There is also one lake site that falls into the 400m cutoff, CM-34 (Guitarmuseum) that is 280m from the coast. As for the inland sites, CM-01 is 600m from the coast and 480m from a freshwater lake, CM-07 is 9000m from the coast and 230m from a bigger freshwater source, CM-41 is 2230m from the coast and 100m from a bigger freshwater source.</p>
+<p>If we look at the total amount of 5 second recordings on <a href="#fig-total" class="quarto-xref">Figure&nbsp;4</a>, then the amount of noise varies less, with CM-12 (coast near Lista) being an extra noisy location. The best overview of how locations differ gives <a href="#fig-noisecall" class="quarto-xref">Figure&nbsp;5</a>. We can see that the number of recordings we can work with is times bigger in lake sites than in coastal sites.</p>
+<p>In terms of how to distribute sites to different classes, I have made a third, “inland” class that doesn’t really fit under the two others, with CM-01 (Utsira lighthouse), CM-07 (Raulemyra) and CM-41 (NMBU campus). Coastal sites are sites up to 400m from the coast, the furthest away being CM-25 near Brusand with 380 meters. There is also one lake site that falls into the 400m cutoff, CM-34 (Guitarmuseum) that is 280m from the coast. As for the inland sites, CM-01 is 600m from the coast and 480m from a freshwater lake, CM-07 is 9000m from the coast and 230m from a bigger freshwater source (wider part of a stream), CM-41 is 2230m from the coast and 100m from a bigger freshwater source (wider part of a stream).</p>
 <div class="cell">
 <div class="cell-output-display">
 <div id="fig-total" class="quarto-float quarto-figure quarto-figure-center anchored">
@@ -370,7 +215,9 @@ Figure&nbsp;5: Correlation between recordings and the amount of noise
 </section>
 <section id="auto-id-bats" class="level2 page-columns page-full">
 <h2 class="anchored" data-anchor-id="auto-id-bats">AUTO-ID bats</h2>
-<p>While the combined auto-id <a href="#fig-autoid" class="quarto-xref">Figure&nbsp;6</a> doesn’t give us a very detailed picture of what species are present, we can still get a proxy of the amount of recordings and species from it. When we compare the coast and the lakes, we can see that the amount of calls differs a lot (<a href="#fig-autoid-compare" class="quarto-xref">Figure&nbsp;7</a>). Out of the top 4 coastal locations, top 2 are next to big rivers (Obrestad Prestegård, Brusand), third one is a fjord that looks like a lake (Framvaren) and fourth one is very sheltered from the sea (Stapnes bedehus).</p>
+<p>While the combined auto-id <a href="#fig-autoid" class="quarto-xref">Figure&nbsp;6</a> doesn’t give us a very detailed picture of what species are present, we can still get a proxy of the amount of recordings and species from it. When we compare the coast and the lakes, we can see that the amount of calls differs a lot (<a href="#fig-autoid-compare" class="quarto-xref">Figure&nbsp;7</a>).<br>
+Out of the top 4 coastal locations, top 2 are next to big rivers (Obrestad Prestegård, Brusand), third one is a fjord that looks like a lake (Framvaren) and fourth one is very sheltered from the sea (Stapnes bedehus).<br>
+CM-46 is the only lake site in a wind farm, but the low number of detections may be due to other reasons.</p>
 <div class="cell">
 <div class="cell-output-display">
 <div id="fig-autoid" class="quarto-float quarto-figure quarto-figure-center anchored">
@@ -433,9 +280,9 @@ Figure&nbsp;7: Comparison of autoid in different sites
 </figure>
 </div>
 </section>
-<section id="occurrance-of-calls" class="level2 page-columns page-full">
-<h2 class="anchored" data-anchor-id="occurrance-of-calls">Occurrance of calls</h2>
-<p>We can see on <a href="#fig-bat-calls" class="quarto-xref">Figure&nbsp;8</a> that in September, the amount of calls recorded, starts to drop. The very beginning of the graph and end on the graph show that not all the detectors were out, that’s why the amount of calls was lower.</p>
+<section id="timing-of-calls" class="level2 page-columns page-full">
+<h2 class="anchored" data-anchor-id="timing-of-calls">Timing of calls</h2>
+<p>We can see on <a href="#fig-bat-calls" class="quarto-xref">Figure&nbsp;8</a> that in September, the total amount of calls recorded starts to drop. We have to bear in mind here that the beginning and end of the graph is lower because the detectors were put up and taken down not all at once.</p>
 <div class="cell">
 <div class="cell-output-display">
 <div id="fig-bat-calls" class="quarto-float quarto-figure quarto-figure-center anchored">
@@ -450,7 +297,9 @@ Figure&nbsp;8: Amount of bat calls
 </div>
 </div>
 </div>
-<p>Over all the sites, the northern bat activity</p>
+<section id="northern-bat-activity" class="level3 page-columns page-full">
+<h3 class="anchored" data-anchor-id="northern-bat-activity">Northern bat activity</h3>
+<p>We can see a high level of avtivity throughout the recording period up until the beginning of september, when activity suddenly drops.</p>
 <div class="cell">
 <div class="cell-output-display">
 <div id="fig-enil" class="quarto-float quarto-figure quarto-figure-center anchored">
@@ -459,7 +308,7 @@ Figure&nbsp;8: Amount of bat calls
 <img src="Overview_of_data_2024_files/figure-html/fig-enil-1.png" class="img-fluid figure-img" width="672">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-enil-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;9: Enil calls
+Figure&nbsp;9: AUTO-ID Enil calls
 </figcaption>
 </figure>
 </div>
@@ -512,7 +361,10 @@ Figure&nbsp;10: Comparison of Enil activity in different sites
 </figcaption>
 </figure>
 </div>
-<p>Over all the sites, the nathusius’ pipistrelle activity</p>
+</section>
+<section id="nathusius-pipistrelle-activity" class="level3 page-columns page-full">
+<h3 class="anchored" data-anchor-id="nathusius-pipistrelle-activity">Nathusius’ pipistrelle activity</h3>
+<p>We can see that in our sites, the activity peaks in September.</p>
 <div class="cell">
 <div class="cell-output-display">
 <div id="fig-pnat" class="quarto-float quarto-figure quarto-figure-center anchored">
@@ -574,7 +426,10 @@ Figure&nbsp;12: Comparison of Pnat activity in different sites
 </figcaption>
 </figure>
 </div>
-<p>Over all the sites, the soprano pipistrelle activity</p>
+</section>
+<section id="soprano-pipistrelle-activity" class="level3 page-columns page-full">
+<h3 class="anchored" data-anchor-id="soprano-pipistrelle-activity">Soprano pipistrelle activity</h3>
+<p>Activity is higher leading up to the September peak, but we can still clearly see a peak that occurs earlier than that of Nathusius’ pipistrelles.</p>
 <div class="cell">
 <div class="cell-output-display">
 <div id="fig-ppyg" class="quarto-float quarto-figure quarto-figure-center anchored">
@@ -636,7 +491,9 @@ Figure&nbsp;14: Comparison of Ppyg activity in different sites
 </figcaption>
 </figure>
 </div>
-<p>Over all the sites, the daubentons’ bat activity</p>
+</section>
+<section id="daubentons-bat-activity" class="level3">
+<h3 class="anchored" data-anchor-id="daubentons-bat-activity">Daubentons’ bat activity</h3>
 <div class="cell">
 <div class="cell-output-display">
 <div id="fig-mdau" class="quarto-float quarto-figure quarto-figure-center anchored">
@@ -652,86 +509,36 @@ Figure&nbsp;15: Mdau calls
 </div>
 </div>
 </section>
+</section>
 <section id="nathusius-pipistrelle-distribution" class="level2">
 <h2 class="anchored" data-anchor-id="nathusius-pipistrelle-distribution">Nathusius’ pipistrelle distribution</h2>
-<p>Nathusius’ pipistrelle median activity on the coastal sites from N to S by from August to retrieval.</p>
+<p>On the study area, some sites had clearly higher amounts of nathusius’ pipistrelles. On the <a href="#fig-pnat-map" class="quarto-xref">Figure&nbsp;16</a> below, we can see how many 5s clips of Auto-ID Pnat we had per site.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(median_dates) <span class="sc">+</span></span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">aes</span>(<span class="at">x =</span> <span class="st">`</span><span class="at">median</span><span class="st">`</span>, <span class="at">y =</span> <span class="st">`</span><span class="at">Site</span><span class="st">`</span>) <span class="sc">+</span></span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">size =</span> <span class="fl">3.35</span>, </span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>             <span class="at">shape =</span> <span class="st">"diamond"</span>) <span class="sc">+</span></span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_viridis_d</span>(<span class="at">option =</span> <span class="st">"cividis"</span>, <span class="at">direction =</span> <span class="dv">1</span>) <span class="sc">+</span></span>
-<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Median activity date"</span>, </span>
-<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"Site"</span>, <span class="at">title =</span> <span class="st">"Median activity by site"</span>, <span class="at">subtitle =</span> <span class="st">"From N to S"</span>) <span class="sc">+</span></span>
-<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_classic</span>() <span class="sc">+</span></span>
-<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">legend.text =</span> <span class="fu">element_text</span>(<span class="at">face =</span> <span class="st">"bold"</span>), <span class="at">legend.title =</span> <span class="fu">element_text</span>(<span class="at">face =</span> <span class="st">"bold"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="Overview_of_data_2024_files/figure-html/pnat%20lat-1.png" class="img-fluid figure-img" width="672"></p>
+<div id="fig-pnat-map" class="cell-output-display quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-pnat-map-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div id="htmlwidget-e1cc6553ed7d801df054" style="width:100%;height:400px;" class="leaflet html-widget"></div>
+<script type="application/json" data-for="htmlwidget-e1cc6553ed7d801df054">{"x":{"options":{"crs":{"crsClass":"L.CRS.EPSG3857","code":null,"proj4def":null,"projectedBounds":null,"options":{}}},"calls":[{"method":"addTiles","args":["http://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}",null,null,{"minZoom":0,"maxZoom":18,"tileSize":256,"subdomains":"abc","errorTileUrl":"","tms":false,"noWrap":false,"zoomOffset":0,"zoomReverse":false,"opacity":1,"zIndex":1,"detectRetina":false}]},{"method":"addMinicharts","args":[[{"dyn":{},"static":{"type":"polar-area","width":45,"height":30,"opacity":1,"labels":"auto","labelMinSize":8,"labelMaxSize":24,"transitionTime":750,"fillColor":"#1f77b4","layerId":"_minichart (4.87126,59.30688)","lat":59.30688,"lng":4.87126},"timeSteps":1},{"dyn":{},"static":{"type":"polar-area","width":45,"height":30,"opacity":1,"labels":"auto","labelMinSize":8,"labelMaxSize":24,"transitionTime":750,"fillColor":"#1f77b4","layerId":"_minichart (4.88367,59.31384)","lat":59.31384,"lng":4.88367},"timeSteps":1},{"dyn":{},"static":{"type":"polar-area","width":45,"height":30,"opacity":1,"labels":"auto","labelMinSize":8,"labelMaxSize":24,"transitionTime":750,"fillColor":"#1f77b4","layerId":"_minichart (5.17928,59.20163)","lat":59.20163,"lng":5.17928},"timeSteps":1},{"dyn":{},"static":{"type":"polar-area","width":45,"height":30,"opacity":1,"labels":"auto","labelMinSize":8,"labelMaxSize":24,"transitionTime":750,"fillColor":"#1f77b4","layerId":"_minichart (5.24453,59.13136)","lat":59.13136,"lng":5.24453},"timeSteps":1},{"dyn":{},"static":{"type":"polar-area","width":45,"height":30,"opacity":1,"labels":"auto","labelMinSize":8,"labelMaxSize":24,"transitionTime":750,"fillColor":"#1f77b4","layerId":"_minichart (5.31707,59.32099)","lat":59.32099,"lng":5.31707},"timeSteps":1},{"dyn":{},"static":{"type":"polar-area","width":45,"height":30,"opacity":1,"labels":"auto","labelMinSize":8,"labelMaxSize":24,"transitionTime":750,"fillColor":"#1f77b4","layerId":"_minichart (5.42001,59.32365)","lat":59.32365,"lng":5.42001},"timeSteps":1},{"dyn":{},"static":{"type":"polar-area","width":45,"height":30,"opacity":1,"labels":"auto","labelMinSize":8,"labelMaxSize":24,"transitionTime":750,"fillColor":"#1f77b4","layerId":"_minichart (5.51721,58.74083)","lat":58.74083,"lng":5.51721},"timeSteps":1},{"dyn":{},"static":{"type":"polar-area","width":45,"height":30,"opacity":1,"labels":"auto","labelMinSize":8,"labelMaxSize":24,"transitionTime":750,"fillColor":"#1f77b4","layerId":"_minichart (5.52283,58.72184)","lat":58.72184,"lng":5.52283},"timeSteps":1},{"dyn":{},"static":{"type":"polar-area","width":45,"height":30,"opacity":1,"labels":"auto","labelMinSize":8,"labelMaxSize":24,"transitionTime":750,"fillColor":"#1f77b4","layerId":"_minichart (5.54214,58.73417)","lat":58.73417,"lng":5.54214},"timeSteps":1},{"dyn":{},"static":{"type":"polar-area","width":45,"height":30,"opacity":1,"labels":"auto","labelMinSize":8,"labelMaxSize":24,"transitionTime":750,"fillColor":"#1f77b4","layerId":"_minichart (5.54655,58.67013)","lat":58.67013,"lng":5.54655},"timeSteps":1},{"dyn":{},"static":{"type":"polar-area","width":45,"height":30,"opacity":1,"labels":"auto","labelMinSize":8,"labelMaxSize":24,"transitionTime":750,"fillColor":"#1f77b4","layerId":"_minichart (5.54898,58.81229)","lat":58.81229,"lng":5.54898},"timeSteps":1},{"dyn":{},"static":{"type":"polar-area","width":45,"height":30,"opacity":1,"labels":"auto","labelMinSize":8,"labelMaxSize":24,"transitionTime":750,"fillColor":"#1f77b4","layerId":"_minichart (5.55381,58.65786)","lat":58.65786,"lng":5.55381},"timeSteps":1},{"dyn":{},"static":{"type":"polar-area","width":45,"height":30,"opacity":1,"labels":"auto","labelMinSize":8,"labelMaxSize":24,"transitionTime":750,"fillColor":"#1f77b4","layerId":"_minichart (5.57001,58.99543)","lat":58.99543,"lng":5.57001},"timeSteps":1},{"dyn":{},"static":{"type":"polar-area","width":45,"height":30,"opacity":1,"labels":"auto","labelMinSize":8,"labelMaxSize":24,"transitionTime":750,"fillColor":"#1f77b4","layerId":"_minichart (5.5714,59.08984)","lat":59.08984,"lng":5.5714},"timeSteps":1},{"dyn":{},"static":{"type":"polar-area","width":45,"height":30,"opacity":1,"labels":"auto","labelMinSize":8,"labelMaxSize":24,"transitionTime":750,"fillColor":"#1f77b4","layerId":"_minichart (5.58233,59.03549)","lat":59.03549,"lng":5.58233},"timeSteps":1},{"dyn":{},"static":{"type":"polar-area","width":45,"height":30,"opacity":1,"labels":"auto","labelMinSize":8,"labelMaxSize":24,"transitionTime":750,"fillColor":"#1f77b4","layerId":"_minichart (5.58848,59.10213)","lat":59.10213,"lng":5.58848},"timeSteps":1},{"dyn":{},"static":{"type":"polar-area","width":45,"height":30,"opacity":1,"labels":"auto","labelMinSize":8,"labelMaxSize":24,"transitionTime":750,"fillColor":"#1f77b4","layerId":"_minichart (5.59877,58.9627)","lat":58.9627,"lng":5.59877},"timeSteps":1},{"dyn":{},"static":{"type":"polar-area","width":45,"height":30,"opacity":1,"labels":"auto","labelMinSize":8,"labelMaxSize":24,"transitionTime":750,"fillColor":"#1f77b4","layerId":"_minichart (5.62052,58.80408)","lat":58.80408,"lng":5.62052},"timeSteps":1},{"dyn":{},"static":{"type":"polar-area","width":45,"height":30,"opacity":1,"labels":"auto","labelMinSize":8,"labelMaxSize":24,"transitionTime":750,"fillColor":"#1f77b4","layerId":"_minichart (5.6382,58.58818)","lat":58.58818,"lng":5.6382},"timeSteps":1},{"dyn":{},"static":{"type":"polar-area","width":45,"height":30,"opacity":1,"labels":"auto","labelMinSize":8,"labelMaxSize":24,"transitionTime":750,"fillColor":"#1f77b4","layerId":"_minichart (5.65477,58.70961)","lat":58.70961,"lng":5.65477},"timeSteps":1},{"dyn":{},"static":{"type":"polar-area","width":45,"height":30,"opacity":1,"labels":"auto","labelMinSize":8,"labelMaxSize":24,"transitionTime":750,"fillColor":"#1f77b4","layerId":"_minichart (5.66482,58.74134)","lat":58.74134,"lng":5.66482},"timeSteps":1},{"dyn":{},"static":{"type":"polar-area","width":45,"height":30,"opacity":1,"labels":"auto","labelMinSize":8,"labelMaxSize":24,"transitionTime":750,"fillColor":"#1f77b4","layerId":"_minichart (5.67563,58.80037)","lat":58.80037,"lng":5.67563},"timeSteps":1},{"dyn":{},"static":{"type":"polar-area","width":45,"height":30,"opacity":1,"labels":"auto","labelMinSize":8,"labelMaxSize":24,"transitionTime":750,"fillColor":"#1f77b4","layerId":"_minichart (5.67571,58.97351)","lat":58.97351,"lng":5.67571},"timeSteps":1},{"dyn":{},"static":{"type":"polar-area","width":45,"height":30,"opacity":1,"labels":"auto","labelMinSize":8,"labelMaxSize":24,"transitionTime":750,"fillColor":"#1f77b4","layerId":"_minichart (5.68185,58.54406)","lat":58.54406,"lng":5.68185},"timeSteps":1},{"dyn":{},"static":{"type":"polar-area","width":45,"height":30,"opacity":1,"labels":"auto","labelMinSize":8,"labelMaxSize":24,"transitionTime":750,"fillColor":"#1f77b4","layerId":"_minichart (5.70374,58.95722)","lat":58.95722,"lng":5.70374},"timeSteps":1},{"dyn":{},"static":{"type":"polar-area","width":45,"height":30,"opacity":1,"labels":"auto","labelMinSize":8,"labelMaxSize":24,"transitionTime":750,"fillColor":"#1f77b4","layerId":"_minichart (5.73502,58.82559)","lat":58.82559,"lng":5.73502},"timeSteps":1},{"dyn":{},"static":{"type":"polar-area","width":45,"height":30,"opacity":1,"labels":"auto","labelMinSize":8,"labelMaxSize":24,"transitionTime":750,"fillColor":"#1f77b4","layerId":"_minichart (5.74226,59.07059)","lat":59.07059,"lng":5.74226},"timeSteps":1},{"dyn":{},"static":{"type":"polar-area","width":45,"height":30,"opacity":1,"labels":"auto","labelMinSize":8,"labelMaxSize":24,"transitionTime":750,"fillColor":"#1f77b4","layerId":"_minichart (5.75277,58.53785)","lat":58.53785,"lng":5.75277},"timeSteps":1},{"dyn":{},"static":{"type":"polar-area","width":45,"height":30,"opacity":1,"labels":"auto","labelMinSize":8,"labelMaxSize":24,"transitionTime":750,"fillColor":"#1f77b4","layerId":"_minichart (5.75427,58.83233)","lat":58.83233,"lng":5.75427},"timeSteps":1},{"dyn":{},"static":{"type":"polar-area","width":45,"height":30,"opacity":1,"labels":"auto","labelMinSize":8,"labelMaxSize":24,"transitionTime":750,"fillColor":"#1f77b4","layerId":"_minichart (5.79613,58.49581)","lat":58.49581,"lng":5.79613},"timeSteps":1},{"dyn":{},"static":{"type":"polar-area","width":45,"height":30,"opacity":1,"labels":"auto","labelMinSize":8,"labelMaxSize":24,"transitionTime":750,"fillColor":"#1f77b4","layerId":"_minichart (5.79613,58.51902)","lat":58.51902,"lng":5.79613},"timeSteps":1},{"dyn":{},"static":{"type":"polar-area","width":45,"height":30,"opacity":1,"labels":"auto","labelMinSize":8,"labelMaxSize":24,"transitionTime":750,"fillColor":"#1f77b4","layerId":"_minichart (5.80554,58.70906)","lat":58.70906,"lng":5.80554},"timeSteps":1},{"dyn":{},"static":{"type":"polar-area","width":45,"height":30,"opacity":1,"labels":"auto","labelMinSize":8,"labelMaxSize":24,"transitionTime":750,"fillColor":"#1f77b4","layerId":"_minichart (5.87119,58.43214)","lat":58.43214,"lng":5.87119},"timeSteps":1},{"dyn":{},"static":{"type":"polar-area","width":45,"height":30,"opacity":1,"labels":"auto","labelMinSize":8,"labelMaxSize":24,"transitionTime":750,"fillColor":"#1f77b4","layerId":"_minichart (5.91342,58.82687)","lat":58.82687,"lng":5.91342},"timeSteps":1},{"dyn":{},"static":{"type":"polar-area","width":45,"height":30,"opacity":1,"labels":"auto","labelMinSize":8,"labelMaxSize":24,"transitionTime":750,"fillColor":"#1f77b4","layerId":"_minichart (6.01593,58.47917)","lat":58.47917,"lng":6.01593},"timeSteps":1},{"dyn":{},"static":{"type":"polar-area","width":45,"height":30,"opacity":1,"labels":"auto","labelMinSize":8,"labelMaxSize":24,"transitionTime":750,"fillColor":"#1f77b4","layerId":"_minichart (6.06036,58.38419)","lat":58.38419,"lng":6.06036},"timeSteps":1},{"dyn":{},"static":{"type":"polar-area","width":45,"height":30,"opacity":1,"labels":"auto","labelMinSize":8,"labelMaxSize":24,"transitionTime":750,"fillColor":"#1f77b4","layerId":"_minichart (6.08257,58.83276)","lat":58.83276,"lng":6.08257},"timeSteps":1},{"dyn":{},"static":{"type":"polar-area","width":45,"height":30,"opacity":1,"labels":"auto","labelMinSize":8,"labelMaxSize":24,"transitionTime":750,"fillColor":"#1f77b4","layerId":"_minichart (6.09307,58.39459)","lat":58.39459,"lng":6.09307},"timeSteps":1},{"dyn":{},"static":{"type":"polar-area","width":45,"height":30,"opacity":1,"labels":"auto","labelMinSize":8,"labelMaxSize":24,"transitionTime":750,"fillColor":"#1f77b4","layerId":"_minichart (6.10106,58.40489)","lat":58.40489,"lng":6.10106},"timeSteps":1},{"dyn":{},"static":{"type":"polar-area","width":45,"height":30,"opacity":1,"labels":"auto","labelMinSize":8,"labelMaxSize":24,"transitionTime":750,"fillColor":"#1f77b4","layerId":"_minichart (6.15507,58.35754)","lat":58.35754,"lng":6.15507},"timeSteps":1},{"dyn":{},"static":{"type":"polar-area","width":45,"height":30,"opacity":1,"labels":"auto","labelMinSize":8,"labelMaxSize":24,"transitionTime":750,"fillColor":"#1f77b4","layerId":"_minichart (6.34161,58.31775)","lat":58.31775,"lng":6.34161},"timeSteps":1},{"dyn":{},"static":{"type":"polar-area","width":45,"height":30,"opacity":1,"labels":"auto","labelMinSize":8,"labelMaxSize":24,"transitionTime":750,"fillColor":"#1f77b4","layerId":"_minichart (6.35037,58.32675)","lat":58.32675,"lng":6.35037},"timeSteps":1},{"dyn":{},"static":{"type":"polar-area","width":45,"height":30,"opacity":1,"labels":"auto","labelMinSize":8,"labelMaxSize":24,"transitionTime":750,"fillColor":"#1f77b4","layerId":"_minichart (6.38623,58.27778)","lat":58.27778,"lng":6.38623},"timeSteps":1},{"dyn":{},"static":{"type":"polar-area","width":45,"height":30,"opacity":1,"labels":"auto","labelMinSize":8,"labelMaxSize":24,"transitionTime":750,"fillColor":"#1f77b4","layerId":"_minichart (6.56647,58.10897)","lat":58.10897,"lng":6.56647},"timeSteps":1},{"dyn":{},"static":{"type":"polar-area","width":45,"height":30,"opacity":1,"labels":"auto","labelMinSize":8,"labelMaxSize":24,"transitionTime":750,"fillColor":"#1f77b4","layerId":"_minichart (6.57506,58.11997)","lat":58.11997,"lng":6.57506},"timeSteps":1},{"dyn":{},"static":{"type":"polar-area","width":45,"height":30,"opacity":1,"labels":"auto","labelMinSize":8,"labelMaxSize":24,"transitionTime":750,"fillColor":"#1f77b4","layerId":"_minichart (6.6242,58.17837)","lat":58.17837,"lng":6.6242},"timeSteps":1},{"dyn":{},"static":{"type":"polar-area","width":45,"height":30,"opacity":1,"labels":"auto","labelMinSize":8,"labelMaxSize":24,"transitionTime":750,"fillColor":"#1f77b4","layerId":"_minichart (6.64304,58.06912)","lat":58.06912,"lng":6.64304},"timeSteps":1},{"dyn":{},"static":{"type":"polar-area","width":45,"height":30,"opacity":1,"labels":"auto","labelMinSize":8,"labelMaxSize":24,"transitionTime":750,"fillColor":"#1f77b4","layerId":"_minichart (6.73682,58.0907)","lat":58.0907,"lng":6.73682},"timeSteps":1},{"dyn":{},"static":{"type":"polar-area","width":45,"height":30,"opacity":1,"labels":"auto","labelMinSize":8,"labelMaxSize":24,"transitionTime":750,"fillColor":"#1f77b4","layerId":"_minichart (6.74934,58.12083)","lat":58.12083,"lng":6.74934},"timeSteps":1},{"dyn":{},"static":{"type":"polar-area","width":45,"height":30,"opacity":1,"labels":"auto","labelMinSize":8,"labelMaxSize":24,"transitionTime":750,"fillColor":"#1f77b4","layerId":"_minichart (6.79569,58.07049)","lat":58.07049,"lng":6.79569},"timeSteps":1}],[[[9]],[[32]],[[23]],[[10]],[[17]],[[50]],[[210]],[[353]],[[2686]],[[87]],[[132]],[[1181]],[[463]],[[1]],[[54]],[[0]],[[93]],[[590]],[[299]],[[609]],[[12962]],[[350]],[[5616]],[[34]],[[3186]],[[103]],[[99]],[[6817]],[[71]],[[2116]],[[294]],[[1706]],[[22]],[[20]],[[87]],[[149]],[[19]],[[21]],[[851]],[[119]],[[103]],[[66]],[[383]],[[3129]],[[1114]],[[80]],[[4161]],[[1078]],[[133]],[[115]]],12962,["#1f77b4","#ff7f0e","#2ca02c","#d62728","#9467bd","#8c564b","e377c2","#7f7f7f","#bcbd22","#17becf"],["1"],null,{"showTitle":true,"showValues":true,"supValues":null,"supLabels":[],"html":null,"noPopup":false,"digits":null,"labels":[]},null,null]}],"limits":{"lat":[58.06912,59.32365],"lng":[4.87126,6.79569]}},"evals":[],"jsHooks":[]}</script>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-pnat-map-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;16: Number of Pnat calls per site
+</figcaption>
 </figure>
 </div>
 </div>
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(cm_pnat_c) <span class="sc">+</span></span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">aes</span>(<span class="at">x =</span> DATE<span class="fl">.12</span>) <span class="sc">+</span></span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_histogram</span>(<span class="at">bins =</span> <span class="dv">30</span>L, <span class="at">fill =</span> <span class="st">"#112446"</span>) <span class="sc">+</span></span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
-<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="fu">vars</span>(Site))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="Overview_of_data_2024_files/figure-html/pnat%20lat-2.png" class="img-fluid figure-img" width="672"></p>
-</figure>
-</div>
-</div>
-</div>
-<p>Diurnal activity patterns on the coast every half month from August to October.</p>
+<p>The median date of activity did not differ that much based on the location, as is seen on <a href="#fig-pnat-ns" class="quarto-xref">Figure&nbsp;17</a> below.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>cm_pnat_c <span class="sc">%&gt;%</span></span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a> <span class="fu">filter</span>(DATE<span class="fl">.12</span> <span class="sc">&gt;=</span> <span class="st">"2024-08-01"</span> <span class="sc">&amp;</span> DATE<span class="fl">.12</span> <span class="sc">&lt;=</span> <span class="st">"2024-10-15"</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a> <span class="fu">ggplot</span>() <span class="sc">+</span></span>
-<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">aes</span>(<span class="at">x =</span> HOUR<span class="fl">.12</span>) <span class="sc">+</span></span>
-<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_histogram</span>(<span class="at">bins =</span> <span class="dv">30</span>L, <span class="at">fill =</span> <span class="st">"#112446"</span>) <span class="sc">+</span></span>
-<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
-<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="fu">vars</span>(DATE))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="Overview_of_data_2024_files/figure-html/diur%20act%20pnat-1.png" class="img-fluid figure-img" width="672"></p>
+<div id="fig-pnat-ns" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-pnat-ns-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="Overview_of_data_2024_files/figure-html/fig-pnat-ns-1.png" class="img-fluid figure-img" width="672">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-pnat-ns-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;17: Median date of Pnat calls per site
+</figcaption>
 </figure>
 </div>
-</div>
-<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>cm_pnat_c <span class="sc">%&gt;%</span></span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(DATE<span class="fl">.12</span> <span class="sc">&gt;=</span> <span class="st">"2024-08-01"</span>,</span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>         DATE<span class="fl">.12</span> <span class="sc">&lt;=</span> <span class="st">"2024-10-15"</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> HOUR<span class="fl">.12</span>)) <span class="sc">+</span></span>
-<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_histogram</span>(<span class="at">bins =</span> <span class="dv">30</span>, <span class="at">fill =</span> <span class="st">"#112446"</span>) <span class="sc">+</span></span>
-<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
-<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="fu">vars</span>(HalfMonth))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="Overview_of_data_2024_files/figure-html/diur%20act%20pnat-2.png" class="img-fluid figure-img" width="672"></p>
-</figure>
-</div>
-</div>
-</div>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>tilesURL <span class="ot">&lt;-</span> <span class="st">"http://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}"</span></span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>basemap <span class="ot">&lt;-</span> <span class="fu">leaflet</span>(<span class="at">width =</span> <span class="st">"100%"</span>, <span class="at">height =</span> <span class="st">"400px"</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">addTiles</span>(tilesURL)</span>
-<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>basemap <span class="sc">%&gt;%</span></span>
-<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">addMinicharts</span>(</span>
-<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>    overview_summary<span class="sc">$</span>longitude, overview_summary<span class="sc">$</span>latitude,</span>
-<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">chartdata =</span> overview_summary<span class="sc">$</span>pnatcalls, </span>
-<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">showLabels =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">width =</span> <span class="dv">45</span></span>
-<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output-display">
-<div id="htmlwidget-69901f45d0c243278f61" style="width:100%;height:400px;" class="leaflet html-widget"></div>
-<script type="application/json" data-for="htmlwidget-69901f45d0c243278f61">{"x":{"options":{"crs":{"crsClass":"L.CRS.EPSG3857","code":null,"proj4def":null,"projectedBounds":null,"options":{}}},"calls":[{"method":"addTiles","args":["http://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}",null,null,{"minZoom":0,"maxZoom":18,"tileSize":256,"subdomains":"abc","errorTileUrl":"","tms":false,"noWrap":false,"zoomOffset":0,"zoomReverse":false,"opacity":1,"zIndex":1,"detectRetina":false}]},{"method":"addMinicharts","args":[[{"dyn":{},"static":{"type":"polar-area","width":45,"height":30,"opacity":1,"labels":"auto","labelMinSize":8,"labelMaxSize":24,"transitionTime":750,"fillColor":"#1f77b4","layerId":"_minichart (4.87126,59.30688)","lat":59.30688,"lng":4.87126},"timeSteps":1},{"dyn":{},"static":{"type":"polar-area","width":45,"height":30,"opacity":1,"labels":"auto","labelMinSize":8,"labelMaxSize":24,"transitionTime":750,"fillColor":"#1f77b4","layerId":"_minichart (4.88367,59.31384)","lat":59.31384,"lng":4.88367},"timeSteps":1},{"dyn":{},"static":{"type":"polar-area","width":45,"height":30,"opacity":1,"labels":"auto","labelMinSize":8,"labelMaxSize":24,"transitionTime":750,"fillColor":"#1f77b4","layerId":"_minichart (5.17928,59.20163)","lat":59.20163,"lng":5.17928},"timeSteps":1},{"dyn":{},"static":{"type":"polar-area","width":45,"height":30,"opacity":1,"labels":"auto","labelMinSize":8,"labelMaxSize":24,"transitionTime":750,"fillColor":"#1f77b4","layerId":"_minichart (5.24453,59.13136)","lat":59.13136,"lng":5.24453},"timeSteps":1},{"dyn":{},"static":{"type":"polar-area","width":45,"height":30,"opacity":1,"labels":"auto","labelMinSize":8,"labelMaxSize":24,"transitionTime":750,"fillColor":"#1f77b4","layerId":"_minichart (5.31707,59.32099)","lat":59.32099,"lng":5.31707},"timeSteps":1},{"dyn":{},"static":{"type":"polar-area","width":45,"height":30,"opacity":1,"labels":"auto","labelMinSize":8,"labelMaxSize":24,"transitionTime":750,"fillColor":"#1f77b4","layerId":"_minichart (5.42001,59.32365)","lat":59.32365,"lng":5.42001},"timeSteps":1},{"dyn":{},"static":{"type":"polar-area","width":45,"height":30,"opacity":1,"labels":"auto","labelMinSize":8,"labelMaxSize":24,"transitionTime":750,"fillColor":"#1f77b4","layerId":"_minichart (5.51721,58.74083)","lat":58.74083,"lng":5.51721},"timeSteps":1},{"dyn":{},"static":{"type":"polar-area","width":45,"height":30,"opacity":1,"labels":"auto","labelMinSize":8,"labelMaxSize":24,"transitionTime":750,"fillColor":"#1f77b4","layerId":"_minichart (5.52283,58.72184)","lat":58.72184,"lng":5.52283},"timeSteps":1},{"dyn":{},"static":{"type":"polar-area","width":45,"height":30,"opacity":1,"labels":"auto","labelMinSize":8,"labelMaxSize":24,"transitionTime":750,"fillColor":"#1f77b4","layerId":"_minichart (5.54214,58.73417)","lat":58.73417,"lng":5.54214},"timeSteps":1},{"dyn":{},"static":{"type":"polar-area","width":45,"height":30,"opacity":1,"labels":"auto","labelMinSize":8,"labelMaxSize":24,"transitionTime":750,"fillColor":"#1f77b4","layerId":"_minichart (5.54655,58.67013)","lat":58.67013,"lng":5.54655},"timeSteps":1},{"dyn":{},"static":{"type":"polar-area","width":45,"height":30,"opacity":1,"labels":"auto","labelMinSize":8,"labelMaxSize":24,"transitionTime":750,"fillColor":"#1f77b4","layerId":"_minichart (5.54898,58.81229)","lat":58.81229,"lng":5.54898},"timeSteps":1},{"dyn":{},"static":{"type":"polar-area","width":45,"height":30,"opacity":1,"labels":"auto","labelMinSize":8,"labelMaxSize":24,"transitionTime":750,"fillColor":"#1f77b4","layerId":"_minichart (5.55381,58.65786)","lat":58.65786,"lng":5.55381},"timeSteps":1},{"dyn":{},"static":{"type":"polar-area","width":45,"height":30,"opacity":1,"labels":"auto","labelMinSize":8,"labelMaxSize":24,"transitionTime":750,"fillColor":"#1f77b4","layerId":"_minichart (5.57001,58.99543)","lat":58.99543,"lng":5.57001},"timeSteps":1},{"dyn":{},"static":{"type":"polar-area","width":45,"height":30,"opacity":1,"labels":"auto","labelMinSize":8,"labelMaxSize":24,"transitionTime":750,"fillColor":"#1f77b4","layerId":"_minichart (5.5714,59.08984)","lat":59.08984,"lng":5.5714},"timeSteps":1},{"dyn":{},"static":{"type":"polar-area","width":45,"height":30,"opacity":1,"labels":"auto","labelMinSize":8,"labelMaxSize":24,"transitionTime":750,"fillColor":"#1f77b4","layerId":"_minichart (5.58233,59.03549)","lat":59.03549,"lng":5.58233},"timeSteps":1},{"dyn":{},"static":{"type":"polar-area","width":45,"height":30,"opacity":1,"labels":"auto","labelMinSize":8,"labelMaxSize":24,"transitionTime":750,"fillColor":"#1f77b4","layerId":"_minichart (5.58848,59.10213)","lat":59.10213,"lng":5.58848},"timeSteps":1},{"dyn":{},"static":{"type":"polar-area","width":45,"height":30,"opacity":1,"labels":"auto","labelMinSize":8,"labelMaxSize":24,"transitionTime":750,"fillColor":"#1f77b4","layerId":"_minichart (5.59877,58.9627)","lat":58.9627,"lng":5.59877},"timeSteps":1},{"dyn":{},"static":{"type":"polar-area","width":45,"height":30,"opacity":1,"labels":"auto","labelMinSize":8,"labelMaxSize":24,"transitionTime":750,"fillColor":"#1f77b4","layerId":"_minichart (5.62052,58.80408)","lat":58.80408,"lng":5.62052},"timeSteps":1},{"dyn":{},"static":{"type":"polar-area","width":45,"height":30,"opacity":1,"labels":"auto","labelMinSize":8,"labelMaxSize":24,"transitionTime":750,"fillColor":"#1f77b4","layerId":"_minichart (5.6382,58.58818)","lat":58.58818,"lng":5.6382},"timeSteps":1},{"dyn":{},"static":{"type":"polar-area","width":45,"height":30,"opacity":1,"labels":"auto","labelMinSize":8,"labelMaxSize":24,"transitionTime":750,"fillColor":"#1f77b4","layerId":"_minichart (5.65477,58.70961)","lat":58.70961,"lng":5.65477},"timeSteps":1},{"dyn":{},"static":{"type":"polar-area","width":45,"height":30,"opacity":1,"labels":"auto","labelMinSize":8,"labelMaxSize":24,"transitionTime":750,"fillColor":"#1f77b4","layerId":"_minichart (5.66482,58.74134)","lat":58.74134,"lng":5.66482},"timeSteps":1},{"dyn":{},"static":{"type":"polar-area","width":45,"height":30,"opacity":1,"labels":"auto","labelMinSize":8,"labelMaxSize":24,"transitionTime":750,"fillColor":"#1f77b4","layerId":"_minichart (5.67563,58.80037)","lat":58.80037,"lng":5.67563},"timeSteps":1},{"dyn":{},"static":{"type":"polar-area","width":45,"height":30,"opacity":1,"labels":"auto","labelMinSize":8,"labelMaxSize":24,"transitionTime":750,"fillColor":"#1f77b4","layerId":"_minichart (5.67571,58.97351)","lat":58.97351,"lng":5.67571},"timeSteps":1},{"dyn":{},"static":{"type":"polar-area","width":45,"height":30,"opacity":1,"labels":"auto","labelMinSize":8,"labelMaxSize":24,"transitionTime":750,"fillColor":"#1f77b4","layerId":"_minichart (5.68185,58.54406)","lat":58.54406,"lng":5.68185},"timeSteps":1},{"dyn":{},"static":{"type":"polar-area","width":45,"height":30,"opacity":1,"labels":"auto","labelMinSize":8,"labelMaxSize":24,"transitionTime":750,"fillColor":"#1f77b4","layerId":"_minichart (5.70374,58.95722)","lat":58.95722,"lng":5.70374},"timeSteps":1},{"dyn":{},"static":{"type":"polar-area","width":45,"height":30,"opacity":1,"labels":"auto","labelMinSize":8,"labelMaxSize":24,"transitionTime":750,"fillColor":"#1f77b4","layerId":"_minichart (5.73502,58.82559)","lat":58.82559,"lng":5.73502},"timeSteps":1},{"dyn":{},"static":{"type":"polar-area","width":45,"height":30,"opacity":1,"labels":"auto","labelMinSize":8,"labelMaxSize":24,"transitionTime":750,"fillColor":"#1f77b4","layerId":"_minichart (5.74226,59.07059)","lat":59.07059,"lng":5.74226},"timeSteps":1},{"dyn":{},"static":{"type":"polar-area","width":45,"height":30,"opacity":1,"labels":"auto","labelMinSize":8,"labelMaxSize":24,"transitionTime":750,"fillColor":"#1f77b4","layerId":"_minichart (5.75277,58.53785)","lat":58.53785,"lng":5.75277},"timeSteps":1},{"dyn":{},"static":{"type":"polar-area","width":45,"height":30,"opacity":1,"labels":"auto","labelMinSize":8,"labelMaxSize":24,"transitionTime":750,"fillColor":"#1f77b4","layerId":"_minichart (5.75427,58.83233)","lat":58.83233,"lng":5.75427},"timeSteps":1},{"dyn":{},"static":{"type":"polar-area","width":45,"height":30,"opacity":1,"labels":"auto","labelMinSize":8,"labelMaxSize":24,"transitionTime":750,"fillColor":"#1f77b4","layerId":"_minichart (5.79613,58.49581)","lat":58.49581,"lng":5.79613},"timeSteps":1},{"dyn":{},"static":{"type":"polar-area","width":45,"height":30,"opacity":1,"labels":"auto","labelMinSize":8,"labelMaxSize":24,"transitionTime":750,"fillColor":"#1f77b4","layerId":"_minichart (5.79613,58.51902)","lat":58.51902,"lng":5.79613},"timeSteps":1},{"dyn":{},"static":{"type":"polar-area","width":45,"height":30,"opacity":1,"labels":"auto","labelMinSize":8,"labelMaxSize":24,"transitionTime":750,"fillColor":"#1f77b4","layerId":"_minichart (5.80554,58.70906)","lat":58.70906,"lng":5.80554},"timeSteps":1},{"dyn":{},"static":{"type":"polar-area","width":45,"height":30,"opacity":1,"labels":"auto","labelMinSize":8,"labelMaxSize":24,"transitionTime":750,"fillColor":"#1f77b4","layerId":"_minichart (5.87119,58.43214)","lat":58.43214,"lng":5.87119},"timeSteps":1},{"dyn":{},"static":{"type":"polar-area","width":45,"height":30,"opacity":1,"labels":"auto","labelMinSize":8,"labelMaxSize":24,"transitionTime":750,"fillColor":"#1f77b4","layerId":"_minichart (5.91342,58.82687)","lat":58.82687,"lng":5.91342},"timeSteps":1},{"dyn":{},"static":{"type":"polar-area","width":45,"height":30,"opacity":1,"labels":"auto","labelMinSize":8,"labelMaxSize":24,"transitionTime":750,"fillColor":"#1f77b4","layerId":"_minichart (6.01593,58.47917)","lat":58.47917,"lng":6.01593},"timeSteps":1},{"dyn":{},"static":{"type":"polar-area","width":45,"height":30,"opacity":1,"labels":"auto","labelMinSize":8,"labelMaxSize":24,"transitionTime":750,"fillColor":"#1f77b4","layerId":"_minichart (6.06036,58.38419)","lat":58.38419,"lng":6.06036},"timeSteps":1},{"dyn":{},"static":{"type":"polar-area","width":45,"height":30,"opacity":1,"labels":"auto","labelMinSize":8,"labelMaxSize":24,"transitionTime":750,"fillColor":"#1f77b4","layerId":"_minichart (6.08257,58.83276)","lat":58.83276,"lng":6.08257},"timeSteps":1},{"dyn":{},"static":{"type":"polar-area","width":45,"height":30,"opacity":1,"labels":"auto","labelMinSize":8,"labelMaxSize":24,"transitionTime":750,"fillColor":"#1f77b4","layerId":"_minichart (6.09307,58.39459)","lat":58.39459,"lng":6.09307},"timeSteps":1},{"dyn":{},"static":{"type":"polar-area","width":45,"height":30,"opacity":1,"labels":"auto","labelMinSize":8,"labelMaxSize":24,"transitionTime":750,"fillColor":"#1f77b4","layerId":"_minichart (6.10106,58.40489)","lat":58.40489,"lng":6.10106},"timeSteps":1},{"dyn":{},"static":{"type":"polar-area","width":45,"height":30,"opacity":1,"labels":"auto","labelMinSize":8,"labelMaxSize":24,"transitionTime":750,"fillColor":"#1f77b4","layerId":"_minichart (6.15507,58.35754)","lat":58.35754,"lng":6.15507},"timeSteps":1},{"dyn":{},"static":{"type":"polar-area","width":45,"height":30,"opacity":1,"labels":"auto","labelMinSize":8,"labelMaxSize":24,"transitionTime":750,"fillColor":"#1f77b4","layerId":"_minichart (6.34161,58.31775)","lat":58.31775,"lng":6.34161},"timeSteps":1},{"dyn":{},"static":{"type":"polar-area","width":45,"height":30,"opacity":1,"labels":"auto","labelMinSize":8,"labelMaxSize":24,"transitionTime":750,"fillColor":"#1f77b4","layerId":"_minichart (6.35037,58.32675)","lat":58.32675,"lng":6.35037},"timeSteps":1},{"dyn":{},"static":{"type":"polar-area","width":45,"height":30,"opacity":1,"labels":"auto","labelMinSize":8,"labelMaxSize":24,"transitionTime":750,"fillColor":"#1f77b4","layerId":"_minichart (6.38623,58.27778)","lat":58.27778,"lng":6.38623},"timeSteps":1},{"dyn":{},"static":{"type":"polar-area","width":45,"height":30,"opacity":1,"labels":"auto","labelMinSize":8,"labelMaxSize":24,"transitionTime":750,"fillColor":"#1f77b4","layerId":"_minichart (6.56647,58.10897)","lat":58.10897,"lng":6.56647},"timeSteps":1},{"dyn":{},"static":{"type":"polar-area","width":45,"height":30,"opacity":1,"labels":"auto","labelMinSize":8,"labelMaxSize":24,"transitionTime":750,"fillColor":"#1f77b4","layerId":"_minichart (6.57506,58.11997)","lat":58.11997,"lng":6.57506},"timeSteps":1},{"dyn":{},"static":{"type":"polar-area","width":45,"height":30,"opacity":1,"labels":"auto","labelMinSize":8,"labelMaxSize":24,"transitionTime":750,"fillColor":"#1f77b4","layerId":"_minichart (6.6242,58.17837)","lat":58.17837,"lng":6.6242},"timeSteps":1},{"dyn":{},"static":{"type":"polar-area","width":45,"height":30,"opacity":1,"labels":"auto","labelMinSize":8,"labelMaxSize":24,"transitionTime":750,"fillColor":"#1f77b4","layerId":"_minichart (6.64304,58.06912)","lat":58.06912,"lng":6.64304},"timeSteps":1},{"dyn":{},"static":{"type":"polar-area","width":45,"height":30,"opacity":1,"labels":"auto","labelMinSize":8,"labelMaxSize":24,"transitionTime":750,"fillColor":"#1f77b4","layerId":"_minichart (6.73682,58.0907)","lat":58.0907,"lng":6.73682},"timeSteps":1},{"dyn":{},"static":{"type":"polar-area","width":45,"height":30,"opacity":1,"labels":"auto","labelMinSize":8,"labelMaxSize":24,"transitionTime":750,"fillColor":"#1f77b4","layerId":"_minichart (6.74934,58.12083)","lat":58.12083,"lng":6.74934},"timeSteps":1},{"dyn":{},"static":{"type":"polar-area","width":45,"height":30,"opacity":1,"labels":"auto","labelMinSize":8,"labelMaxSize":24,"transitionTime":750,"fillColor":"#1f77b4","layerId":"_minichart (6.79569,58.07049)","lat":58.07049,"lng":6.79569},"timeSteps":1}],[[[9]],[[32]],[[23]],[[10]],[[17]],[[50]],[[210]],[[353]],[[2686]],[[87]],[[132]],[[1181]],[[463]],[[1]],[[54]],[[0]],[[93]],[[590]],[[299]],[[609]],[[12962]],[[350]],[[5616]],[[34]],[[3186]],[[103]],[[99]],[[6817]],[[71]],[[2116]],[[294]],[[1706]],[[22]],[[20]],[[87]],[[149]],[[19]],[[21]],[[851]],[[119]],[[103]],[[66]],[[383]],[[3129]],[[1114]],[[80]],[[4161]],[[1078]],[[133]],[[115]]],12962,["#1f77b4","#ff7f0e","#2ca02c","#d62728","#9467bd","#8c564b","e377c2","#7f7f7f","#bcbd22","#17becf"],["1"],null,{"showTitle":true,"showValues":true,"supValues":null,"supLabels":[],"html":null,"noPopup":false,"digits":null,"labels":[]},null,null]}],"limits":{"lat":[58.06912,59.32365],"lng":[4.87126,6.79569]}},"evals":[],"jsHooks":[]}</script>
 </div>
 </div>
 </section>
