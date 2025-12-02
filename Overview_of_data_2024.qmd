@@ -434,7 +434,7 @@ ggplot(auto_id_data %>%
 
 ## Timing of calls
 
-We can see on @fig-bat-calls that in September, the total amount of calls recorded starts to drop. We have to bear in mind here that the beginning and end og the graph is lower because the detectors were put up and taken down not all at once.
+We can see on @fig-bat-calls that in September, the total amount of calls recorded starts to drop. We have to bear in mind here that the beginning and end of the graph is lower because the detectors were put up and taken down not all at once.
 
 ```{r combined plot}
 #| echo: false
@@ -736,7 +736,7 @@ basemap %>%
   )
 ```
 
-The median date of activity did not differ that much based on the location, as is seen on a @fig-pnat-ns below.
+The median date of activity did not differ that much based on the location, as is seen on @fig-pnat-ns below.
 
 ```{r pnat lat map}
 #| echo: false
@@ -785,7 +785,7 @@ basemap %>%
 #| echo: false
 #| label: fig-pnat-ns
 #| warning: false
-#| fig-cap: Distribution of Pnat calls per site
+#| fig-cap: Median date of Pnat calls per site
 
 # remove sites that have no data in Sept: 33, 37,47,48
 
