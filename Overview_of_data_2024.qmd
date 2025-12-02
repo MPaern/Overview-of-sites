@@ -1,7 +1,9 @@
 ---
 title: "Overview of data collected in the field season of 2024 for coastal monitoring"
 author: "Maris Pärn"
-format: html
+format:
+  html:
+    embed-resources: true
 editor: visual
 ---
 
