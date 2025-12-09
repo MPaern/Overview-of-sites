@@ -227,12 +227,11 @@ cm_pnat_c <- cm_pnat_c %>%
 
 ```
 
-
-## Deployment times 
+## Deployment times
 
 This is a graph that shows the days with missing data and how long the detectors were in the field.
 
-```{r missing dates plot} 
+```{r missing dates plot}
 #| echo: false
 #| label: fig-missing
 #| warning: false
@@ -240,7 +239,7 @@ This is a graph that shows the days with missing data and how long the detectors
 
 ggplot(all_dates, aes(x = Date, y = Site, color = Type)) +
   geom_point(size = 2) +
-  scale_color_manual(values = c("Observed" = "darkgrey", "NoData" = "darkgrey", "Missing" = "red")) +
+  scale_color_manual(values = c("Observed" = "azure3", "NoData" = "darkgrey", "Missing" = "red")) +
   theme_minimal() +
   scale_y_discrete(expand = expansion(mult = c(0.01, 0.01)))+
   labs(title = "Observed and Missing Dates for 2024")
@@ -315,11 +314,9 @@ ggplot(subset(noise_coast, type == "inland")) +
 
 ```
 
-If we look at the total amount of 5 second recordings on @fig-total, then the amount of noise varies less, with CM-12 (coast near Lista) being an extra noisy location. The best overview of how locations differ gives @fig-noisecall. We can see that the number of recordings we can work with is times bigger in lake sites than in coastal sites. 
+If we look at the total amount of 5 second recordings on @fig-total, then the amount of noise varies less, with CM-12 (coast near Lista) being an extra noisy location. The best overview of how locations differ gives @fig-noisecall. We can see that the number of recordings we can work with is times bigger in lake sites than in coastal sites.
 
-In terms of how to distribute sites to different classes, I have made a third, "inland" class that doesn't really fit under the two others, with CM-01 (Utsira lighthouse), CM-07 (Raulemyra) and CM-41 (NMBU campus). Coastal sites are sites up to 400m from the coast, the furthest away being CM-25 near Brusand with 380 meters. There is also one lake site that falls into the 400m cutoff, CM-34 (Guitarmuseum) that is 280m from the coast. 
-As for the inland sites, CM-01 is 600m from the coast and 480m from a freshwater lake, CM-07 is 9000m from the coast and 230m from a bigger freshwater source (wider part of a stream), CM-41 is 2230m from the coast and 100m from a bigger freshwater source (wider part of a stream). 
-
+In terms of how to distribute sites to different classes, I have made a third, "inland" class that doesn't really fit under the two others, with CM-01 (Utsira lighthouse), CM-07 (Raulemyra) and CM-41 (NMBU campus). Coastal sites are sites up to 400m from the coast, the furthest away being CM-25 near Brusand with 380 meters. There is also one lake site that falls into the 400m cutoff, CM-34 (Guitarmuseum) that is 280m from the coast. As for the inland sites, CM-01 is 600m from the coast and 480m from a freshwater lake, CM-07 is 9000m from the coast and 230m from a bigger freshwater source (wider part of a stream), CM-41 is 2230m from the coast and 100m from a bigger freshwater source (wider part of a stream).
 
 ```{r noise figure 5}
 #| echo: false
@@ -362,8 +359,8 @@ ggplot(overview_summary) +
 
 ## AUTO-ID bats
 
-While the combined auto-id @fig-autoid doesn't give us a very detailed picture of what species are present, we can still get a proxy of the amount of recordings and species from it. When we compare the coast and the lakes, we can see that the amount of calls differs a lot (@fig-autoid-compare). \
-Out of the top 4 coastal locations, top 2 are next to big rivers (Obrestad Prestegård, Brusand), third one is a fjord that looks like a lake (Framvaren) and fourth one is very sheltered from the sea (Stapnes bedehus). \
+While the combined auto-id @fig-autoid doesn't give us a very detailed picture of what species are present, we can still get a proxy of the amount of recordings and species from it. When we compare the coast and the lakes, we can see that the amount of calls differs a lot (@fig-autoid-compare).\
+Out of the top 4 coastal locations, top 2 are next to big rivers (Obrestad Prestegård, Brusand), third one is a fjord that looks like a lake (Framvaren) and fourth one is very sheltered from the sea (Stapnes bedehus).\
 CM-46 is the only lake site in a wind farm, but the low number of detections may be due to other reasons.
 
 ```{r auto-id figure}
@@ -500,7 +497,7 @@ ggplot(cm %>%
     theme_minimal()
 ```
 
-### Northern bat activity 
+### Northern bat activity
 
 We can see a high level of avtivity throughout the recording period up until the beginning of september, when activity suddenly drops.
 
@@ -567,7 +564,7 @@ ggplot(cm %>%
 
 ```
 
-### Nathusius' pipistrelle activity 
+### Nathusius' pipistrelle activity
 
 We can see that in our sites, the activity peaks in September.
 
@@ -631,7 +628,7 @@ ggplot(cm %>%
     theme_minimal()
 ```
 
-### Soprano pipistrelle activity 
+### Soprano pipistrelle activity
 
 Activity is higher leading up to the September peak, but we can still clearly see a peak that occurs earlier than that of Nathusius’ pipistrelles.
 
@@ -695,7 +692,7 @@ ggplot(cm %>%
     theme_minimal()
 ```
 
-### Daubentons' bat activity 
+### Daubentons' bat activity
 
 ```{r mdau}
 #| echo: false
@@ -713,10 +710,9 @@ ggplot(cm %>%
     theme_minimal()
 ```
 
+## Nathusius' pipistrelle distribution
 
-## Nathusius' pipistrelle distribution 
-
-On the study area, some sites had clearly higher amounts of nathusius' pipistrelles. On the @fig-pnat-map below, we can see how many 5s clips of Auto-ID Pnat we had per site. 
+On the study area, some sites had clearly higher amounts of nathusius' pipistrelles. On the @fig-pnat-map below, we can see how many 5s clips of Auto-ID Pnat we had per site.
 
 ```{r pnat map}
 #| echo: false
