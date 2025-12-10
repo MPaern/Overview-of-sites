@@ -27,7 +27,7 @@ library(tidyr)
 # read necessary data in
 
 overview_summary <- read.csv("overview_2024.csv")
-cm <- read.csv("cm_all_2024.csv")
+cm <- read.csv("cm_all_2024.csv") # has to be in the folder
 missing_dates <- read.csv("Missing dates v4.csv")
 missing_2024 <- read.csv("2024_missing_vetted.csv")
 
@@ -240,7 +240,7 @@ This is a graph that shows the days with missing data and how long the detectors
 
 ggplot(all_dates, aes(x = Date, y = Site, color = Type)) +
   geom_point(size = 2) +
-  scale_color_manual(values = c("Observed" = "darkgrey", "NoData" = "darkgrey", "Missing" = "red")) +
+  scale_color_manual(values = c("Observed" = "azure3", "NoData" = "darkgrey", "Missing" = "red")) +
   theme_minimal() +
   scale_y_discrete(expand = expansion(mult = c(0.01, 0.01)))+
   labs(title = "Observed and Missing Dates for 2024")

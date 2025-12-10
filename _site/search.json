@@ -1,0 +1,100 @@
+[
+  {
+    "objectID": "Overview_of_data_2024.html",
+    "href": "Overview_of_data_2024.html",
+    "title": "Overview of data collected in the field season of 2024 for coastal monitoring",
+    "section": "",
+    "text": "Number of detectors: 50\n\nNumber of detectors that survived the season: 48\n\nReasons of detector failure: Water damage by humans, seawater damage by other forces\n\nDate of first deployment: 2024-06-14 11:46:00\n\nDate of last deployment: 2024-07-20 08:33:00\n\nDate of first retrieval: 2024-08-16 12:11:03\n\nDate of last retrieval: 2024-10-17 16:30:00\n\nDays detectors were on the field: 4908\n\nDays with missing data: 318\n\n% of missing data from all data: ca 6,5\n\nReasons of missing data:\n\n1) No bats, no noise detected (later Nodata): 19\n\n2) SD card full: 238\n\n3) Batteries empty: 23\n\n4) Detector dead: 33\n\nAverage time detector deployed: 91.84"
+  },
+  {
+    "objectID": "Overview_of_data_2024.html#summary-of-2024",
+    "href": "Overview_of_data_2024.html#summary-of-2024",
+    "title": "Overview of data collected in the field season of 2024 for coastal monitoring",
+    "section": "",
+    "text": "Number of detectors: 50\n\nNumber of detectors that survived the season: 48\n\nReasons of detector failure: Water damage by humans, seawater damage by other forces\n\nDate of first deployment: 2024-06-14 11:46:00\n\nDate of last deployment: 2024-07-20 08:33:00\n\nDate of first retrieval: 2024-08-16 12:11:03\n\nDate of last retrieval: 2024-10-17 16:30:00\n\nDays detectors were on the field: 4908\n\nDays with missing data: 318\n\n% of missing data from all data: ca 6,5\n\nReasons of missing data:\n\n1) No bats, no noise detected (later Nodata): 19\n\n2) SD card full: 238\n\n3) Batteries empty: 23\n\n4) Detector dead: 33\n\nAverage time detector deployed: 91.84"
+  },
+  {
+    "objectID": "Overview_of_data_2024.html#deployment-times",
+    "href": "Overview_of_data_2024.html#deployment-times",
+    "title": "Overview of data collected in the field season of 2024 for coastal monitoring",
+    "section": "Deployment times",
+    "text": "Deployment times\nThis is a graph that shows the days with missing data and how long the detectors were in the field.\n\n\n\n\n\n\n\n\nFigure 1: Missing dates 2024"
+  },
+  {
+    "objectID": "Overview_of_data_2024.html#noise",
+    "href": "Overview_of_data_2024.html#noise",
+    "title": "Overview of data collected in the field season of 2024 for coastal monitoring",
+    "section": "Noise",
+    "text": "Noise\nFigure 2 Shows the proportion of noise in all the sites. We can see that some of the sites are a lot noisier than others. Coastal sites tend to have more noise, but it varies from 20% (CM-27, sheltered by Kvassheim lighthouse) to 99% (Utsira-2). From lakesites, the most noise was 78% (CM-14, lake in Lista) and the least 11% (CM-34, guitarmuseum).\n\n\n\n\n\n\n\n\nFigure 2: Proportion of noise on sites\n\n\n\n\n\n\n\n\n\n\nComparison of noise in different sites\n\n\n\n\nFigure 3\n\n\n\nIf we look at the total amount of 5 second recordings on Figure 4, then the amount of noise varies less, with CM-12 (coast near Lista) being an extra noisy location. The best overview of how locations differ gives Figure 5. We can see that the number of recordings we can work with is times bigger in lake sites than in coastal sites.\nIn terms of how to distribute sites to different classes, I have made a third, “inland” class that doesn’t really fit under the two others, with CM-01 (Utsira lighthouse), CM-07 (Raulemyra) and CM-41 (NMBU campus). Coastal sites are sites up to 400m from the coast, the furthest away being CM-25 near Brusand with 380 meters. There is also one lake site that falls into the 400m cutoff, CM-34 (Guitarmuseum) that is 280m from the coast. As for the inland sites, CM-01 is 600m from the coast and 480m from a freshwater lake, CM-07 is 9000m from the coast and 230m from a bigger freshwater source (wider part of a stream), CM-41 is 2230m from the coast and 100m from a bigger freshwater source (wider part of a stream).\n\n\n\n\n\n\n\n\nFigure 4: Amount of recordings and noise\n\n\n\n\n\n\n\n\n\n\n\n\n\nFigure 5: Correlation between recordings and the amount of noise"
+  },
+  {
+    "objectID": "Overview_of_data_2024.html#auto-id-bats",
+    "href": "Overview_of_data_2024.html#auto-id-bats",
+    "title": "Overview of data collected in the field season of 2024 for coastal monitoring",
+    "section": "AUTO-ID bats",
+    "text": "AUTO-ID bats\nWhile the combined auto-id Figure 6 doesn’t give us a very detailed picture of what species are present, we can still get a proxy of the amount of recordings and species from it. When we compare the coast and the lakes, we can see that the amount of calls differs a lot (Figure 7).\nOut of the top 4 coastal locations, top 2 are next to big rivers (Obrestad Prestegård, Brusand), third one is a fjord that looks like a lake (Framvaren) and fourth one is very sheltered from the sea (Stapnes bedehus).\nCM-46 is the only lake site in a wind farm, but the low number of detections may be due to other reasons.\n\n\n\n\n\n\n\n\nFigure 6: Amount of bat calls\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n(a) AutoID on coast\n\n\n\n\n\n\n\n\n\n\n\n(b) AutoID around lakes\n\n\n\n\n\n\n\n\n\n\n\n(c) AutoID inland\n\n\n\n\n\n\n\nFigure 7: Comparison of autoid in different sites"
+  },
+  {
+    "objectID": "Overview_of_data_2024.html#timing-of-calls",
+    "href": "Overview_of_data_2024.html#timing-of-calls",
+    "title": "Overview of data collected in the field season of 2024 for coastal monitoring",
+    "section": "Timing of calls",
+    "text": "Timing of calls\nWe can see on Figure 8 that in September, the total amount of calls recorded starts to drop. We have to bear in mind here that the beginning and end of the graph is lower because the detectors were put up and taken down not all at once.\n\n\n\n\n\n\n\n\nFigure 8: Amount of bat calls\n\n\n\n\n\n\nNorthern bat activity\nWe can see a high level of avtivity throughout the recording period up until the beginning of september, when activity suddenly drops.\n\n\n\n\n\n\n\n\nFigure 9: AUTO-ID Enil calls\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n(a) Activity on coast\n\n\n\n\n\n\n\n\n\n\n\n(b) Activity around lakes\n\n\n\n\n\n\n\n\n\n\n\n(c) Activity inland\n\n\n\n\n\n\n\nFigure 10: Comparison of Enil activity in different sites\n\n\n\n\n\nNathusius’ pipistrelle activity\nWe can see that in our sites, the activity peaks in September.\n\n\n\n\n\n\n\n\nFigure 11: Pnat calls\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n(a) Activity on coast\n\n\n\n\n\n\n\n\n\n\n\n(b) Activity around lakes\n\n\n\n\n\n\n\n\n\n\n\n(c) Activity inland\n\n\n\n\n\n\n\nFigure 12: Comparison of Pnat activity in different sites\n\n\n\n\n\nSoprano pipistrelle activity\nActivity is higher leading up to the September peak, but we can still clearly see a peak that occurs earlier than that of Nathusius’ pipistrelles.\n\n\n\n\n\n\n\n\nFigure 13: Ppyg calls\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n(a) Activity on coast\n\n\n\n\n\n\n\n\n\n\n\n(b) Activity around lakes\n\n\n\n\n\n\n\n\n\n\n\n(c) Activity inland\n\n\n\n\n\n\n\nFigure 14: Comparison of Ppyg activity in different sites\n\n\n\n\n\nDaubentons’ bat activity\n\n\n\n\n\n\n\n\nFigure 15: Mdau calls"
+  },
+  {
+    "objectID": "Overview_of_data_2024.html#nathusius-pipistrelle-distribution",
+    "href": "Overview_of_data_2024.html#nathusius-pipistrelle-distribution",
+    "title": "Overview of data collected in the field season of 2024 for coastal monitoring",
+    "section": "Nathusius’ pipistrelle distribution",
+    "text": "Nathusius’ pipistrelle distribution\nOn the study area, some sites had clearly higher amounts of nathusius’ pipistrelles. On the Figure 16 below, we can see how many 5s clips of Auto-ID Pnat we had per site.\n\n\n\n\n\n\n\n\nFigure 16: Number of Pnat calls per site\n\n\n\n\nThe median date of activity did not differ that much based on the location, as is seen on Figure 17 below.\n\n\n\n\n\n\n\n\nFigure 17: Median date of Pnat calls per site"
+  },
+  {
+    "objectID": "docs/site_libs/minichart-0.2.2/doc/introduction.html",
+    "href": "docs/site_libs/minichart-0.2.2/doc/introduction.html",
+    "title": "Introduction to leaflet.minicharts",
+    "section": "",
+    "text": "For a few years now, it has become very to create interactive maps with R thanks to the package leaflet by the Rstudio team. Nevertheless, it only provides only a few functions to create basic shapes on a map, so the information that can be represented on a single map is limited: if you have some data associated to some points, you can only represent at most two variables by drawing circles and changing their radius and color according to data.\nleaflet.minicharts is an R package that provides two functions to add and update small charts on an interactive maps created with the package leaflet. These charts can be used to represent as many variables as desired associated to geographical points. Currently, three types of chart are supported: barcharts (the default), pie charts and polar area charts.\nlet’s have a look to a concrete example."
+  },
+  {
+    "objectID": "docs/site_libs/minichart-0.2.2/doc/introduction.html#data",
+    "href": "docs/site_libs/minichart-0.2.2/doc/introduction.html#data",
+    "title": "Introduction to leaflet.minicharts",
+    "section": "Data",
+    "text": "Data\nThe package provides a table that contains the electric production, consumption and exchanges of France from january 2010 to february 2017 and of 12 french regions from january 2013 to february 2017.\nIn addition to the total production, the table contains one column for each type of production. The table also contains the latitude and longitude of the center of the regions.\n\nlibrary(leaflet.minicharts)\ndata(\"eco2mix\")\nhead(eco2mix)\n\n                  area      lng      lat   month total nuclear coal fuel gaz\n1 Auvergne-Rhone-Alpes 4.537338 45.51266 2015-03 11430    8230    6   40 200\n2 Auvergne-Rhone-Alpes 4.537338 45.51266 2015-06 10056    7200    4   35   5\n3 Auvergne-Rhone-Alpes 4.537338 45.51266 2013-04 10532    7410    0   31   3\n4 Auvergne-Rhone-Alpes 4.537338 45.51266 2015-04 10103    7275    4   39  86\n5 Auvergne-Rhone-Alpes 4.537338 45.51266 2014-08  9052    6357    0   25  -1\n6 Auvergne-Rhone-Alpes 4.537338 45.51266 2015-11  9258    7192    5   45 250\n  hydraulic wind solar bioenergy load balance export import balanceUK balanceES\n1      2737   74    57        82 6326    4747     NA     NA        NA        NA\n2      2606   44   101        58 4848    4891     NA     NA        NA        NA\n3      2948   55    39        42   NA      NA     NA     NA        NA        NA\n4      2487   66    81        61 5283    4439     NA     NA        NA        NA\n5      2487   38    76        68 4299    4447     NA     NA        NA        NA\n6      1563   75    40        86 5829    3141     NA     NA        NA        NA\n  balanceIT balanceCH balanceDEBE\n1        NA        NA          NA\n2        NA        NA          NA\n3        NA        NA          NA\n4        NA        NA          NA\n5        NA        NA          NA\n6        NA        NA          NA"
+  },
+  {
+    "objectID": "docs/site_libs/minichart-0.2.2/doc/introduction.html#renewable-productions-in-2016",
+    "href": "docs/site_libs/minichart-0.2.2/doc/introduction.html#renewable-productions-in-2016",
+    "title": "Introduction to leaflet.minicharts",
+    "section": "Renewable productions in 2016",
+    "text": "Renewable productions in 2016\nNowadays, France has an objective of 23% of renewable energies in the consumption of the country by 2020. Are the country close to its objective. Is the share of renewable energies similar in all regions?\nTo answer this question let us focus on the year 2016 We first prepare the required data with package dplyr:\n\nlibrary(dplyr)\n\nprod2016 &lt;- eco2mix %&gt;%\n  mutate(\n    renewable = bioenergy + solar + wind + hydraulic,\n    non_renewable = total - bioenergy - solar - wind - hydraulic\n  ) %&gt;%\n  filter(grepl(\"2016\", month) & area != \"France\") %&gt;%\n  select(-month) %&gt;%\n  group_by(area, lat, lng) %&gt;%\n  summarise_all(sum) %&gt;%\n  ungroup()\n\nhead(prod2016)\n\n# A tibble: 6 × 23\n  area          lat   lng  total nuclear  coal  fuel   gaz hydraulic  wind solar\n  &lt;chr&gt;       &lt;dbl&gt; &lt;dbl&gt;  &lt;dbl&gt;   &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;     &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;\n1 Auvergne-R…  45.5  4.54 108517   75002    59   101  2318     28398   849   803\n2 Bourgogne-…  47.2  4.81   2762       0     0     1   644       939   773   211\n3 Bretagne     48.2 -2.84   3141       0     0     9   543       581  1472   192\n4 Centre-Val…  47.5  1.69  78430   75733     0     0   274       120  1616   238\n5 Grand-Est    48.7  5.61 107755   82734  1650    41  8282      8990  4917   462\n6 Hauts-de-F…  50.0  2.77  45593   31222    48    17  8302         8  4851   122\n# ℹ 12 more variables: bioenergy &lt;dbl&gt;, load &lt;dbl&gt;, balance &lt;dbl&gt;,\n#   export &lt;dbl&gt;, import &lt;dbl&gt;, balanceUK &lt;dbl&gt;, balanceES &lt;dbl&gt;,\n#   balanceIT &lt;dbl&gt;, balanceCH &lt;dbl&gt;, balanceDEBE &lt;dbl&gt;, renewable &lt;dbl&gt;,\n#   non_renewable &lt;dbl&gt;\n\n\nWe also create a base map that will be used in all the following examples\n\nlibrary(leaflet)\n\ntilesURL &lt;- \"http://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}\"\n\nbasemap &lt;- leaflet(width = \"100%\", height = \"400px\") %&gt;%\n  addTiles(tilesURL)\n\nWe now add to the base map a pie chart for each region that represents the share of renewable energies. We also change the width of the pie charts so their area is proportional to the total production of the corresponding region.\n\ncolors &lt;- c(\"#4fc13c\", \"#cccccc\")\n\nbasemap %&gt;%\n  addMinicharts(\n    prod2016$lng, prod2016$lat,\n    type = \"pie\",\n    chartdata = prod2016[, c(\"renewable\", \"non_renewable\")], \n    colorPalette = colors, \n    width = 60 * sqrt(prod2016$total) / sqrt(max(prod2016$total)), transitionTime = 0\n  )\n\n\n\n\n\nWe can see that the three south east regions exceed the target of 23%, but most regions are far from this objective. Globally, renewable energies represented only 19% percent of the production of 2016.\nNow let’s represent the different types of renewable production using bar charts.\n\nrenewable2016 &lt;- prod2016 %&gt;% select(hydraulic, solar, wind)\ncolors &lt;- c(\"#3093e5\", \"#fcba50\", \"#a0d9e8\")\nbasemap %&gt;%\n  addMinicharts(\n    prod2016$lng, prod2016$lat,\n    chartdata = renewable2016,\n    colorPalette = colors,\n    width = 45, height = 45\n  )\n\n\n\n\n\nHydraulic production is far more important than solar and wind. Without surprise, solar production is more important in south while wind production is more important in the north."
+  },
+  {
+    "objectID": "docs/site_libs/minichart-0.2.2/doc/introduction.html#representing-a-single-variable",
+    "href": "docs/site_libs/minichart-0.2.2/doc/introduction.html#representing-a-single-variable",
+    "title": "Introduction to leaflet.minicharts",
+    "section": "Representing a single variable",
+    "text": "Representing a single variable\nleaflet.minicharts has been designed to represent multiple variables at once, but you still may want to use it to represent a single variable. In the next example, we represent the total load of each french region in 2016. When data passed to addMinicharts contains a single column, it automatically represents it with circle which area is proportional to the corresponding value. In the example we also use the parameter showLabels to display rounded values of the variable inside the circles.\n\nbasemap %&gt;%\n  addMinicharts(\n    prod2016$lng, prod2016$lat,\n    chartdata = prod2016$load,\n    showLabels = TRUE,\n    width = 45\n  )\n\n\n\n\n\nThis is nice, isn’t it?"
+  },
+  {
+    "objectID": "docs/site_libs/minichart-0.2.2/doc/introduction.html#animated-maps",
+    "href": "docs/site_libs/minichart-0.2.2/doc/introduction.html#animated-maps",
+    "title": "Introduction to leaflet.minicharts",
+    "section": "Animated maps",
+    "text": "Animated maps\nUntil now, we have only represented aggregated data but it would be nice to create a map that represents the evolution over time of some variables. It is actually easy with leaflet.minicharts. The first step is to construct a table containing longitude, latitude, a time column and the variables we want to represent. The table eco2mix already has all these columns. We only need to filter the rows containing data for the entire country.\n\nprodRegions &lt;- eco2mix %&gt;% filter(area != \"France\")\n\nNow we can create our animated map by using the argument “time”:\n\nbasemap %&gt;% \n  addMinicharts(\n    prodRegions$lng, prodRegions$lat, \n    chartdata = prodRegions[, c(\"hydraulic\", \"solar\", \"wind\")],\n    time = prodRegions$month,\n    colorPalette = colors,\n    width = 45, height = 45\n  )"
+  },
+  {
+    "objectID": "docs/site_libs/minichart-0.2.2/doc/introduction.html#represent-flows",
+    "href": "docs/site_libs/minichart-0.2.2/doc/introduction.html#represent-flows",
+    "title": "Introduction to leaflet.minicharts",
+    "section": "Represent flows",
+    "text": "Represent flows\nSince version 0.2, leaflet.minicharts has also functions to represent flows between points and their evolution. To illustrate this, let’s represent the evolution of electricity exchanges between France and Neighboring countries.\nTo do that, we use function addFlows. It requires coordinates of two points for each flow and the value of the flow. Other arguments are similar to addMinicharts.\n\ndata(\"eco2mixBalance\")\nbal &lt;- eco2mixBalance\nbasemap %&gt;%\n  addFlows(\n    bal$lng0, bal$lat0, bal$lng1, bal$lat1,\n    flow = bal$balance,\n    time = bal$month\n  )\n\n\n\n\n\nOf course, you can represent flows and minicharts on the same map!"
+  },
+  {
+    "objectID": "docs/site_libs/minichart-0.2.2/doc/introduction.html#use-in-shiny-web-applications",
+    "href": "docs/site_libs/minichart-0.2.2/doc/introduction.html#use-in-shiny-web-applications",
+    "title": "Introduction to leaflet.minicharts",
+    "section": "Use in shiny web applications",
+    "text": "Use in shiny web applications\nIn shiny applications, you can create nice transition effects by using functions leafletproxy and updateMinicharts/updateFlows. In the server function you first need to initialize the map and the minicharts. The important thing here is to use parameter layerId so that updateMinicharts can know which chart to update with which values.\n\nserver &lt;- function(input, output, session) {\n  # Initialize map\n  output$mymap &lt;- renderLeaflet(\n    leaflet() %&gt;% addTiles() %&gt;%\n      addMinicharts(lon, lat, layerId = uniqueChartIds)\n  )\n}\n\nThen use leafletProxy() and updateMinicharts in your reactive code:\n\nserver &lt;- function(input, output, session) {\n  # Initialize map\n  ...\n  \n  # Update map\n  observe({\n    newdata &lt;- getData(input$myinput)\n    \n    leafletProxy(\"mymap\") %&gt;% \n      updateMinicharts(uniqueChartIds, chartdata = newdata, ...)\n  })\n}\n\nYou can find a live example here."
+  }
+]
