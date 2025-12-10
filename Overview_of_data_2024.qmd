@@ -806,6 +806,8 @@ ggplot(median_dates_all) +
 #| echo: false
 #| warning: false
 
+# what time of day is there more activity in the coastal sites?
+
 ggplot(cm_pnat_c) +
   aes(x = DATE.12) +
   geom_histogram(bins = 30L, fill = "#112446") +
