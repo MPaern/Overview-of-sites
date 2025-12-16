@@ -22,6 +22,8 @@ library(hms)
 library(leaflet.minicharts)
 library(leaflet)
 library(tidyr)
+library(zoo)
+library(circular)
 
 
 # read necessary data in
@@ -831,3 +833,49 @@ cm_pnat_c %>%
   facet_wrap(vars(HalfMonth))
 
 ```
+
+
+
+
+## Weather data 
+
+```{r setup}
+#| echo: false
+#| warning: false
+
+# read necessary data in
+
+weather <- read.csv("WeatherData2024.csv")
+
+# fix df, remove NA-s
+
+weather$X <- NULL
+weather$Unnamed..0 <- NULL
+weather$Unnamed..0.1 <- NULL
+
+summary(weather)
+
+weather <- na.omit(weather)
+
+
+
+```
+
+```{r interpolation of data}
+# for temperature, pressure, cloud area, humidity and wind speed, I'll use linear interpolation
+
+
+
+# for wind direction, I'll use circular interpolation
+
+
+
+# precipitation I'll assess based on the values before/after
+
+
+```
+
+```{r exploration}
+
+```
+
