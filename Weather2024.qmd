@@ -1,5 +1,5 @@
 ---
-title: "Weather2024"
+title: "Weather 2024"
 author: "Maris Pärn"
 editor: visual
 ---
@@ -7,6 +7,9 @@ editor: visual
 ## Exploration of weather data from MetNo
 
 ```{r setup}
+#| echo: false
+#| warning: false
+
 
 library(tidyverse)
 library(ggplot2)
@@ -20,6 +23,9 @@ library(circular)
 ```
 
 ```{r data}
+#| echo: false
+#| warning: false
+
 
 weather <- read.csv("WeatherData2024.csv")
 overview_summary <- read.csv("overview_2024.csv")
@@ -38,6 +44,9 @@ overview_summary <- read.csv("overview_2024.csv")
 ```
 
 ```{r interpolation}
+#| echo: false
+#| warning: false
+
 
  # for temperature, pressure, cloud area, humidity and wind speed, I'll use linear interpolation
   
@@ -131,6 +140,9 @@ overview_summary <- read.csv("overview_2024.csv")
 ```
 
 ```{r temperature}
+#| echo: false
+#| warning: false
+
 
 weather_full_ns <- weather_full %>%
     arrange(location_latitude) %>%
@@ -167,6 +179,9 @@ weather_full_ns <- weather_full %>%
 ```
 
 ```{r wind}
+#| echo: false
+#| warning: false
+
 
   wind_summary <- weather_full %>%
     group_by(name) %>%
@@ -184,7 +199,8 @@ weather_full_ns <- weather_full %>%
 ```
 
 ```{r others}
-
+#| echo: false
+#| warning: false
 
  ggplot(weather_full_ns,
          aes(location_longitude, location_latitude, color = air_temperature_2m)) +
