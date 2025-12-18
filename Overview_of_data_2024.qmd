@@ -833,3 +833,87 @@ cm_pnat_c %>%
 
 ```
 
+```{r daytime bats, include=FALSE}
+
+# vector of all the days active in 2024
+days <- seq(from = as.POSIXct("2024-06-28"), to = as.POSIXct("2024-10-07"), by = "days")
+
+# coordinates 
+lat <- 58.9954
+lon <- 5.5700
+coord <- matrix(c(lon, lat), nrow = 1)
+
+# compute sunrise and sunset times for every day
+sun_times <- data.frame(
+  date = days,
+  sunrise = sunriset(coord, days, direction = "sunrise", POSIXct.out = TRUE)$time,
+  sunset = sunriset(coord, days, direction = "sunset", POSIXct.out = TRUE)$time
+)
+
+# strip date information from sunrise and sunset columns
+sun_times$sunrise <- format(sun_times$sunrise, format = "%H:%M:%S")
+sun_times$sunset <- format(sun_times$sunset, format = "%H:%M:%S")
+
+# convert character to time
+sun_times$sunrise <- hms(sun_times$sunrise)
+sun_times$sunset <- hms(sun_times$sunset)
+
+# what class is used in plot
+# class(sun_times$date)
+# class(sun_times$sunrise)
+
+# convert points of noise and non-noise to correct classes
+noise$DATE <- as.POSIXct(noise$DATE, format="%Y-%m-%d")
+#class(wo_noise$MANUAL.ID)
+noise$TIME <- as.character(noise$TIME)
+noise$TIME <- hms(noise$TIME)
+wo_noise$DATE <- as.POSIXct(wo_noise$DATE, format="%Y-%m-%d")
+wo_noise$TIME <- as.character(wo_noise$TIME)
+wo_noise$TIME <- hms(wo_noise$TIME)
+
+```
+
+```{r sunrise and sunset plot}
+# plot the result
+ggplot(sun_times, aes(x = date, ymin = sunrise, ymax = sunset)) +
+  labs(
+    title = "Plot 2. 2024 Recorded Sounds Compared to Daylight",
+    subtitle = "Vistenes, Norge"
+  ) +
+  geom_ribbon(fill = "orange", alpha = 0.5) + 
+  scale_x_datetime(
+    name = "Date",
+    date_labels = "%b",
+    date_breaks = "1 month",
+    minor_breaks = NULL,
+  ) +
+  scale_y_time(
+    name = "Time",
+    breaks = hm(paste(seq(from = 0, to = 24, by = 2), 0)),
+    labels = function(t) sprintf("%02d:%02d", hour(t), minute(t)),
+    limits = c(hm("0 00"), hm("24 00"))
+  ) +
+  geom_point(
+    data = noise,
+    aes(x = DATE, y = TIME, fill = MANUAL.ID),
+    inherit.aes = FALSE
+  ) +
+  geom_point(
+    data = wo_noise,
+    inherit.aes = FALSE,
+    aes(x = DATE, y = TIME, colour = MANUAL.ID),
+  ) +
+  scale_colour_manual(
+    values = c(
+      "VESMUR" = "blue", 
+      "PIPPYG" = "hotpink2", 
+      "PIPNAT" = "red", 
+      "NYCNOC" = "darkred", 
+      "EPTNIL" = "steelblue3", 
+      "EPTNIL+PIPPYG" = "darkblue")
+  )
+
+```
+
+```
+

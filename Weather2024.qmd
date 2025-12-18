@@ -19,6 +19,7 @@ library(MetBrewer)
 library(hms)
 library(zoo)
 library(circular)
+library(ggrepel)
 
 ```
 
@@ -34,12 +35,18 @@ overview_summary <- read.csv("overview_2024.csv")
   weather$X <- NULL
   weather$Unnamed..0 <- NULL
   weather$Unnamed..0.1 <- NULL
-  
-  summary(weather)
+
   
   weather <- na.omit(weather)
   
   summary(weather)
+  
+  
+
+  
+# make a list of hours that I have the data from and see if it matches the hours I have the weather data for
+  
+
 
 ```
 
@@ -136,6 +143,10 @@ overview_summary <- read.csv("overview_2024.csv")
     group_by(name) %>%
     fill(all_of(site_vars), .direction = "downup") %>%
     ungroup()
+  
+  # add type to weather 
+  
+  weather_full$type <- overview_summary$type[match(weather_full$name, overview_summary$Site)]
 
 ```
 
@@ -165,12 +176,13 @@ weather_full_ns <- weather_full %>%
       sd_temp   = sd(air_temperature_2m, na.rm = TRUE)
     )
   
-  library(ggrepel)
+  temp_summary$type <- overview_summary$type[match(temp_summary$name, overview_summary$Site)]
   
-  ggplot(temp_summary, aes(mean_temp, sd_temp, label = name)) +
+  
+  ggplot(temp_summary, aes(mean_temp, sd_temp, label = name, colour = type)) +
     geom_point() +
     geom_text_repel(size = 3, max.overlaps = 50) +
-    theme_bw() +
+    theme_classic() +
     labs(
       x = "Mean temperature",
       y = "Temperature SD"
@@ -273,7 +285,7 @@ weather_full_ns <- weather_full %>%
       x = "Site",
       title = "Dominant wind direction and strength by site"
     )
-  )
+
 
 ggplot(wind_summary,
        aes(x = location_longitude,
