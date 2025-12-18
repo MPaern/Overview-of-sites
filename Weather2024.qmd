@@ -1,7 +1,12 @@
-## Weather data
+---
+title: "Weather2024"
+author: "Maris Pärn"
+editor: visual
+---
 
+## Exploration of weather data from MetNo
 
-# setup -------------------------------------------------------------------
+```{r setup}
 
 library(tidyverse)
 library(ggplot2)
@@ -12,8 +17,9 @@ library(hms)
 library(zoo)
 library(circular)
 
+```
 
-# data --------------------------------------------------------------------
+```{r data}
 
 weather <- read.csv("WeatherData2024.csv")
 overview_summary <- read.csv("overview_2024.csv")
@@ -29,9 +35,11 @@ overview_summary <- read.csv("overview_2024.csv")
   
   summary(weather)
 
-# interpolation of data --------------------------------------------------------------------
+```
 
-  # for temperature, pressure, cloud area, humidity and wind speed, I'll use linear interpolation
+```{r interpolation}
+
+ # for temperature, pressure, cloud area, humidity and wind speed, I'll use linear interpolation
   
   # create a column with datetime format
   
@@ -120,9 +128,11 @@ overview_summary <- read.csv("overview_2024.csv")
     fill(all_of(site_vars), .direction = "downup") %>%
     ungroup()
 
-# temperature -------------------------------------------------------------
+```
 
-  weather_full_ns <- weather_full %>%
+```{r temperature}
+
+weather_full_ns <- weather_full %>%
     arrange(location_latitude) %>%
     mutate(
       name = factor(name, levels = unique(name))
@@ -153,11 +163,11 @@ overview_summary <- read.csv("overview_2024.csv")
       x = "Mean temperature",
       y = "Temperature SD"
     )
-  
-  
 
-# wind --------------------------------------------------------------------
-   
+```
+
+```{r wind}
+
   wind_summary <- weather_full %>%
     group_by(name) %>%
     summarise(
@@ -171,9 +181,12 @@ overview_summary <- read.csv("overview_2024.csv")
     labs(y = "Max wind speed (m/s)") +
     theme(axis.text.x = element_text(angle = 90))
 
-# looking around ----------------------------------------------------------
+```
 
-  ggplot(weather_full_ns,
+```{r others}
+
+
+ ggplot(weather_full_ns,
          aes(location_longitude, location_latitude, color = air_temperature_2m)) +
     geom_point() +
     coord_equal() +
@@ -286,3 +299,6 @@ ggplot(wind_uv,
            yend = mean_speed)) +
   geom_segment(arrow = arrow(length = unit(0.2, "cm"))) +
   coord_flip()
+
+```
+
