@@ -6,6 +6,8 @@ editor: visual
 
 ## Exploration of weather data from MetNo
 
+What was the weather like in summer-autumn 2024? Using hourly data (only acquired for detector running times, not 24h). One hour (20.08 22:00) interpolated. Temperature, air pressure, cloud area, humidity and wind speed aquired through linear interpolation. Wind direction made with circular interpolation and precipitation listed as 0 based on neighboring hours.
+
 ```{r setup}
 #| echo: false
 #| warning: false
@@ -148,10 +150,15 @@ overview_summary <- read.csv("overview_2024.csv")
   # add type to weather 
   
   weather_full$type <- overview_summary$type[match(weather_full$name, overview_summary$Site)]
+  
+  
+  # --------check if all necessary timepoints are present based on cm_all. This dataset is still in UTC, should I have the other one also in UTC or change this into UTC+2??---
 
 ```
 
-Here I'll see what the temperatures are like around my sites. We see some outliers, as CM-07 has lower mean temperature during the detector work times and CM-01 and Cm-02 have more stable temperatures as the only 2 locations further away in the sea.
+### Temperature
+
+Here I'll see what the temperatures are like around my sites. We see some outliers, as CM-07 has lower mean temperature during the detector work times and CM-01 and CM-02 have more stable temperatures as the only 2 locations further away in the sea.
 
 ```{r temperature}
 #| echo: false
@@ -189,7 +196,16 @@ ggplot(temp_summary, aes(mean_temp, sd_temp, label = name)) +
     y = "Temperature SD"
   )
 
+ggplot(weather_full_ns) +
+ aes(x = datetime, y = air_temperature_2m) +
+ geom_line(colour = "#3A69BE") +
+ labs(x = "Date", y = "Temperature (°C)", title = "Temperature trend over 2024 season") +
+ theme_bw() +
+ theme(legend.text = element_text(size = 12L), legend.title = element_text(size = 12L))
+
 ```
+
+### Wind
 
 ```{r wind}
 #| echo: false
@@ -210,19 +226,6 @@ ggplot(temp_summary, aes(mean_temp, sd_temp, label = name)) +
     theme_classic() +
     labs(y = "Max wind speed (m/s)") +
     theme(axis.text.x = element_text(angle = 90))
-
-```
-
-```{r others}
-#| echo: false
-#| warning: false
-
-  
-ggplot(weather_full_ns, aes(x = name, y = cloud_area_fraction)) +
-  stat_summary(fun = mean, geom = "point") +
-  theme_bw() +
-  labs(x = "Site from N to S", y = "Mean cloud coverage") +
-  theme(axis.text.x = element_text(angle = 90))
   
   windRose(
     weather_full,
@@ -280,9 +283,14 @@ wind_summary$mean_wind <- mean_wind$mean_wind[match(wind_summary$name, mean_wind
     theme(axis.text.x = element_text(angle = 90))
 
 
-```
-```{r precipitation}
 
+```
+
+### Precipitation
+
+```{r precipitation}
+#| echo: false
+#| warning: false
 # put a threshold for rain (dataset has a lot of minuscle values)
 
 rain_threshold <- 0.1
@@ -310,20 +318,6 @@ ggplot(rain_freq, aes(name, wet_frac)) +
   theme(axis.text.x = element_text(angle = 90))
 
 ggplot(weather_full_ns) +
- aes(x = datetime, y = air_pressure_at_sea_level) +
- geom_line(colour = "#3A69BE") +
- labs(x = "Date", y = "Air pressure at sea level (hPa)", title = "Air pressure change over all the sites ") +
- theme_bw() +
- theme(legend.text = element_text(size = 12L), legend.title = element_text(size = 12L))
-
-ggplot(weather_full_ns) +
- aes(x = datetime, y = air_temperature_2m) +
- geom_line(colour = "#3A69BE") +
- labs(x = "Date", y = "Temperature (°C)", title = "Temperature trend over 2024 season") +
- theme_bw() +
- theme(legend.text = element_text(size = 12L), legend.title = element_text(size = 12L))
-
-ggplot(weather_full_ns) +
  aes(x = datetime, y = precipitation_amount, colour = type) +
  geom_point() +
  scale_color_hue(direction = 1) +
@@ -333,3 +327,24 @@ ggplot(weather_full_ns) +
  theme(legend.text = element_text(size = 12L), legend.title = element_text(size = 12L))
 ```
 
+### Other parameters
+
+```{r others}
+#| echo: false
+#| warning: false
+
+  
+ggplot(weather_full_ns, aes(x = name, y = cloud_area_fraction)) +
+  stat_summary(fun = mean, geom = "point") +
+  theme_bw() +
+  labs(x = "Site from N to S", y = "Mean cloud coverage") +
+  theme(axis.text.x = element_text(angle = 90))
+  
+ggplot(weather_full_ns) +
+ aes(x = datetime, y = air_pressure_at_sea_level) +
+ geom_line(colour = "#3A69BE") +
+ labs(x = "Date", y = "Air pressure at sea level (hPa)", title = "Air pressure change over all the sites ") +
+ theme_bw() +
+ theme(legend.text = element_text(size = 12L), legend.title = element_text(size = 12L))
+
+```
