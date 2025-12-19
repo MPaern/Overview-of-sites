@@ -233,7 +233,15 @@ ggplot(weather_full_ns, aes(x = name, y = cloud_area_fraction)) +
   )
   
   windRose(
-    subset(weather_full, month %in% c(6, 7, 8)),
+    subset(weather_full, month %in% c(6,7)),
+    ws = "wind_speed_10m",
+    wd = "wind_direction_10m",
+    facet = "name",
+    ncol = 5
+  )
+  
+    windRose(
+    subset(weather_full, month %in% c(8)),
     ws = "wind_speed_10m",
     wd = "wind_direction_10m",
     facet = "name",
@@ -241,7 +249,15 @@ ggplot(weather_full_ns, aes(x = name, y = cloud_area_fraction)) +
   )
   
   windRose(
-    subset(weather_full, month %in% c(9, 10)),
+    subset(weather_full, month %in% c(9)),
+    ws = "wind_speed_10m",
+    wd = "wind_direction_10m",
+    facet = "name",
+    ncol = 5
+  )
+  
+    windRose(
+    subset(weather_full, month %in% c(10)),
     ws = "wind_speed_10m",
     wd = "wind_direction_10m",
     facet = "name",
@@ -265,3 +281,55 @@ wind_summary$mean_wind <- mean_wind$mean_wind[match(wind_summary$name, mean_wind
 
 
 ```
+```{r precipitation}
+
+# put a threshold for rain (dataset has a lot of minuscle values)
+
+rain_threshold <- 0.1
+
+weather_full_ns <- weather_full_ns %>%
+  mutate(
+    rain_mm = if_else(
+      precipitation_amount >= rain_threshold,
+      precipitation_amount,
+      0
+    ),
+    rain = precipitation_amount >= rain_threshold
+  )
+
+rain_freq <- weather_full_ns %>%
+  group_by(name) %>%
+  summarise(
+    wet_frac = mean(rain, na.rm = TRUE)
+  )
+
+ggplot(rain_freq, aes(name, wet_frac)) +
+  geom_col() +
+  theme_bw() +
+  labs(y = "Fraction of wet hours (≥ 0.1 mm)") +
+  theme(axis.text.x = element_text(angle = 90))
+
+ggplot(weather_full_ns) +
+ aes(x = datetime, y = air_pressure_at_sea_level) +
+ geom_line(colour = "#3A69BE") +
+ labs(x = "Date", y = "Air pressure at sea level (hPa)", title = "Air pressure change over all the sites ") +
+ theme_bw() +
+ theme(legend.text = element_text(size = 12L), legend.title = element_text(size = 12L))
+
+ggplot(weather_full_ns) +
+ aes(x = datetime, y = air_temperature_2m) +
+ geom_line(colour = "#3A69BE") +
+ labs(x = "Date", y = "Temperature (°C)", title = "Temperature trend over 2024 season") +
+ theme_bw() +
+ theme(legend.text = element_text(size = 12L), legend.title = element_text(size = 12L))
+
+ggplot(weather_full_ns) +
+ aes(x = datetime, y = precipitation_amount, colour = type) +
+ geom_point() +
+ scale_color_hue(direction = 1) +
+ labs(x = "Date", y = "Precipitation (mm)", title = "Amount of rainfall in 2024 field season", 
+ color = "Category") +
+ theme_bw() +
+ theme(legend.text = element_text(size = 12L), legend.title = element_text(size = 12L))
+```
+
