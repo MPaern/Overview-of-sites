@@ -45,10 +45,13 @@ overview_summary <- read.csv("overview_2024.csv")
   summary(weather)
   
   
-
-  
-# make a list of hours that I have the data from and see if it matches the hours I have the weather data for
-  
+# comparing actual hours CM detectors were out in 2024 and hours I have data for for detectors in 2024. 
+  # step 1 list of actual data from 2024 - location and hour (in UTC?)
+    
+  # step 2 list of hours I have weather data for
+    
+  # step 3 see if they match and list weather data hours that I am missing (even if it is for noise or whatever)
+    
 
 
 ```
