@@ -47,6 +47,8 @@ overview_summary <- read.csv("overview_2024.csv")
   
 # comparing actual hours CM detectors were out in 2024 and hours I have data for for detectors in 2024. 
   # step 1 list of actual data from 2024 - location and hour (in UTC?)
+  # not the actual data by hour, only the complete dataset I supposed to have, actual data by hour is a bit trickier. 
+  # so this step is the perfect dataset list, that is not true. in UTC.
     
   # step 2 list of hours I have weather data for
     
