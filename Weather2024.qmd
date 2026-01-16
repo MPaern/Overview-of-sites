@@ -51,17 +51,6 @@ overview_summary <- read.csv("overview_2024.csv")
 #| echo: false
 #| warning: false
 
-  
-# comparing actual hours CM detectors were out in 2024 and hours I have data for for detectors in 2024. 
-  # step 1 list of actual data from 2024 - location and hour (in UTC?)
-  # not the actual data by hour, only the complete dataset I supposed to have, actual data by hour is a bit trickier.
-
-  # so this step is the perfect dataset list, that is not true. in UTC.
-    
-  # step 2 list of hours I have weather data for
-    
-  # step 3 see if they match and list weather data hours that I am missing (even if it is for noise or whatever)
-
 # Calculate sunset and sunrise times by Site for the whole time detector was active
 
 overview_summary <- overview_summary %>%
@@ -106,7 +95,13 @@ suntimes_site$site <- overview_summary$Site [
     paste(round(overview_summary$latitude, 5), round(overview_summary$longitude, 5))
   )
 ]
-  
+
+# Make hourly list of times by site that detectors were active in UTC  
+
+# compare hours to the weather data: 1) note if there are weather hours missing that are in the sunrise-sunset hour list 
+                                    #2) make df with only the weather hours that I'm going to use the data from (aka sunrise + 1 hour and sunset - 1 hour weather data?)
+                                    
+# look what hours I actually have from data and which nights are full/ what is missing
 
 ```
 

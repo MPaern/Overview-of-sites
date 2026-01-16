@@ -915,5 +915,4 @@ ggplot(sun_times, aes(x = date, ymin = sunrise, ymax = sunset)) +
 
 ```
 
-```
-
+\`\`\`
