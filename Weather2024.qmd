@@ -23,6 +23,7 @@ library(zoo)
 library(circular)
 library(ggrepel)
 library(openair)
+library(suncalc)
 
 ```
 
@@ -43,20 +44,67 @@ overview_summary <- read.csv("overview_2024.csv")
   weather <- na.omit(weather)
   
   summary(weather)
-  
+
+```
+
+```{r sunset and sunrise times}
+#| echo: false
+#| warning: false
+
   
 # comparing actual hours CM detectors were out in 2024 and hours I have data for for detectors in 2024. 
   # step 1 list of actual data from 2024 - location and hour (in UTC?)
-  # not the actual data by hour, only the complete dataset I supposed to have, actual data by hour is a bit trickier. 
+  # not the actual data by hour, only the complete dataset I supposed to have, actual data by hour is a bit trickier.
+
   # so this step is the perfect dataset list, that is not true. in UTC.
     
   # step 2 list of hours I have weather data for
     
   # step 3 see if they match and list weather data hours that I am missing (even if it is for noise or whatever)
-    
 
+# Calculate sunset and sunrise times by Site for the whole time detector was active
+
+overview_summary <- overview_summary %>%
+  mutate(
+    earliest_active = as.Date(earliest_active),
+    last_active     = as.Date(last_active)
+  )
+
+suntimes_site <- overview_summary %>%
+  rowwise() %>%
+  mutate(date = list(seq(earliest_active, last_active, by = "day"))) %>%
+  unnest(date) %>%
+  ungroup()
+
+suntimes_site <- suntimes_site[, c(3, 11, 12, 16, 17, 21)]
+  
+ get_sun_times <- function(date, lat, lon) {
++   times <- getSunlightTimes(
++     date = date,
++     lat = lat,
++     lon = lon,
++     keep = c("sunrise", "sunset"),
++     tz = "UTC"
++   )
++   
++   tibble(
++     sunrise_utc = times$sunrise,
++     sunset_utc  = times$sunset
++   )
++ }
+
+suntimes_site <- suntimes_site %>%
+  rowwise() %>%
+  mutate(
+    start_times = list(get_sun_times(earliest_active, latitude, longitude)),
+    end_times   = list(get_sun_times(last_active, latitude, longitude))
+  ) %>%
+  unnest_wider(start_times, names_sep = "_start_") %>%
+  unnest_wider(end_times,   names_sep = "_end_") %>%
+  ungroup()
 
 ```
+
 
 ```{r interpolation}
 #| echo: false
