@@ -77,31 +77,36 @@ suntimes_site <- overview_summary %>%
   ungroup()
 
 suntimes_site <- suntimes_site[, c(3, 11, 12, 16, 17, 21)]
-  
- get_sun_times <- function(date, lat, lon) {
-+   times <- getSunlightTimes(
-+     date = date,
-+     lat = lat,
-+     lon = lon,
-+     keep = c("sunrise", "sunset"),
-+     tz = "UTC"
-+   )
-+   
-+   tibble(
-+     sunrise_utc = times$sunrise,
-+     sunset_utc  = times$sunset
-+   )
-+ }
 
 suntimes_site <- suntimes_site %>%
-  rowwise() %>%
-  mutate(
-    start_times = list(get_sun_times(earliest_active, latitude, longitude)),
-    end_times   = list(get_sun_times(last_active, latitude, longitude))
-  ) %>%
-  unnest_wider(start_times, names_sep = "_start_") %>%
-  unnest_wider(end_times,   names_sep = "_end_") %>%
-  ungroup()
+  mutate(date = as.Date(date)) %>%
+  rename(
+    lat = latitude,
+    lon = longitude
+  )
+
+suntimes_site <- getSunlightTimes(
+  data = suntimes_site,
+  keep = c("sunrise", "sunset"),
+  tz   = "UTC"
+)
+
+suntimes_site <- suntimes_site %>%
+  rename(
+    latitude  = lat,
+    longitude = lon,
+    sunrise_utc = sunrise,
+    sunset_utc  = sunset
+  )
+
+
+suntimes_site$site <- overview_summary$Site [
+  match(
+    paste(round(suntimes_site$latitude, 5), round(suntimes_site$longitude, 5)),
+    paste(round(overview_summary$latitude, 5), round(overview_summary$longitude, 5))
+  )
+]
+  
 
 ```
 
