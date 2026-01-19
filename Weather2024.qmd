@@ -43,7 +43,7 @@ overview_summary <- read.csv("overview_2024.csv")
   
   weather <- na.omit(weather)
   
-  summary(weather)
+  # summary(weather)
 
 ```
 
@@ -104,7 +104,6 @@ suntimes_site$site <- overview_summary$Site [
 # look what hours I actually have from data and which nights are full/ what is missing
 
 ```
-
 
 ```{r interpolation}
 #| echo: false
@@ -211,11 +210,13 @@ suntimes_site$site <- overview_summary$Site [
 
 ### Temperature
 
-Here I'll see what the temperatures are like around my sites. We see some outliers, as CM-07 has lower mean temperature during the detector work times and CM-01 and CM-02 have more stable temperatures as the only 2 locations further away in the sea.
+Here I'll see what the temperatures are like around my sites. I arranged the sites from north to south and I can see on @fig-temperature-overview that the mean temperatures are similar throughout the study area. To further highlight some outliers, we see that on @fig-temperature-mean that CM-07 has lower mean temperature during the detector work times and CM-01 and CM-02 have more stable temperatures as they are the only 2 locations on an island. CM-07 is located in a W-E facing valley.
 
 ```{r temperature}
 #| echo: false
+#| label: fig-temperature-overview
 #| warning: false
+#| fig-cap: Temperature differences between sites
 
 
 weather_full_ns <- weather_full %>%
@@ -230,8 +231,15 @@ weather_full_ns <- weather_full %>%
     labs(x = "Site from N to S", y = "Temperature (°C)") +
     theme(axis.text.x = element_text(angle = 90))
 
-  
-  temp_summary <- weather_full %>%
+```
+
+```{r temperature 1}
+#| echo: false
+#| label: fig-temperature-mean
+#| warning: false
+#| fig-cap: Mean temperature at the sites
+
+ temp_summary <- weather_full %>%
     group_by(name) %>%
     summarise(
       mean_temp = mean(air_temperature_2m, na.rm = TRUE),
@@ -249,6 +257,15 @@ ggplot(temp_summary, aes(mean_temp, sd_temp, label = name)) +
     y = "Temperature SD"
   )
 
+
+```
+
+```{r temperature 2}
+#| echo: false
+#| label: fig-temperature-trend
+#| warning: false
+#| fig-cap: Temperature trend throughout 2024 season
+
 ggplot(weather_full_ns) +
  aes(x = datetime, y = air_temperature_2m) +
  geom_line(colour = "#3A69BE") +
@@ -256,13 +273,16 @@ ggplot(weather_full_ns) +
  theme_bw() +
  theme(legend.text = element_text(size = 12L), legend.title = element_text(size = 12L))
 
+
 ```
 
 ### Wind
 
-```{r wind}
+```{r wind 1}
 #| echo: false
+#| label: fig-max-wind
 #| warning: false
+#| fig-cap: Maximum wind speed on the sites
 
 
   wind_summary <- weather_full_ns %>%
@@ -279,14 +299,53 @@ ggplot(weather_full_ns) +
     theme_classic() +
     labs(y = "Max wind speed (m/s)") +
     theme(axis.text.x = element_text(angle = 90))
+
+```
+
+```{r wind 2}
+#| echo: false
+#| label: fig-mean-wind
+#| warning: false
+#| fig-cap: Mean wind speed on the sites
+
+mean_wind <- weather_full %>%
+    group_by(name) %>%
+    summarise(
+      mean_wind = mean(wind_speed_10m, na.rm = TRUE)
+    )
+
+wind_summary$mean_wind <- mean_wind$mean_wind[match(wind_summary$name, mean_wind$name)]
   
-  windRose(
-    weather_full,
-    ws = "wind_speed_10m",
-    wd = "wind_direction_10m",
-    facet = "name",
-    ncol = 5
-  )
+
+ ggplot(wind_summary, aes(x = name, y = mean_wind)) +
+    geom_col(aes(fill= type)) +
+    theme_classic() +
+    labs(y = "Mean wind speed (m/s)") +
+    theme(axis.text.x = element_text(angle = 90))
+ 
+```
+
+```{r wind roses}
+#| echo: false
+#| label: fig-wind-direction
+#| warning: false
+#| include: false
+#| fig-cap: Comparison of wind direction by month
+#| fig-subcap:
+#| - "Wind direction in June-July"
+#| - "Wind direction in August"
+#| - "Wind direction in September"
+#| - "Wind direction in October"
+#| layout-ncol: 4
+#| column: page
+
+#  windRose(
+#    weather_full,
+#    ws = "wind_speed_10m",
+#    wd = "wind_direction_10m",
+#    facet = "name",
+#    ncol = 5
+#  )
   
   windRose(
     subset(weather_full, month %in% c(6,7)),
@@ -296,7 +355,7 @@ ggplot(weather_full_ns) +
     ncol = 5
   )
   
-    windRose(
+   windRose(
     subset(weather_full, month %in% c(8)),
     ws = "wind_speed_10m",
     wd = "wind_direction_10m",
@@ -319,23 +378,6 @@ ggplot(weather_full_ns) +
     facet = "name",
     ncol = 5
   )
-
-mean_wind <- weather_full %>%
-    group_by(name) %>%
-    summarise(
-      mean_wind = mean(wind_speed_10m, na.rm = TRUE)
-    )
-
-wind_summary$mean_wind <- mean_wind$mean_wind[match(wind_summary$name, mean_wind$name)]
-  
-
- ggplot(wind_summary, aes(x = name, y = mean_wind)) +
-    geom_col(aes(fill= type)) +
-    theme_classic() +
-    labs(y = "Mean wind speed (m/s)") +
-    theme(axis.text.x = element_text(angle = 90))
-
-
 
 ```
 
