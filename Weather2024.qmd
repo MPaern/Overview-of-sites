@@ -2,11 +2,14 @@
 title: "Weather 2024"
 author: "Maris Pärn"
 editor: visual
+format:
+  html:
+    self-contained: true
 ---
 
 ## Exploration of weather data from MetNo
 
-What was the weather like in summer-autumn 2024? Using hourly data (only acquired for detector running times, not 24h). One hour (20.08 22:00) interpolated. Temperature, air pressure, cloud area, humidity and wind speed aquired through linear interpolation. Wind direction made with circular interpolation and precipitation listed as 0 based on neighboring hours.
+What was the weather like in summer-autumn 2024? Using hourly data (only acquired for detector running times, not 24h). One hour (20.08.24 22:00) interpolated. Temperature, air pressure, cloud area, humidity and wind speed aquired through linear interpolation. Wind direction found with circular interpolation and precipitation listed as 0 to all the sites based on neighboring hours.
 
 ```{r setup}
 #| echo: false
@@ -24,6 +27,7 @@ library(circular)
 library(ggrepel)
 library(openair)
 library(suncalc)
+library(quarto)
 
 ```
 
@@ -210,9 +214,9 @@ suntimes_site$site <- overview_summary$Site [
 
 ### Temperature
 
-Here I'll see what the temperatures are like around my sites. I arranged the sites from north to south and I can see on @fig-temperature-overview that the mean temperatures are similar throughout the study area. To further highlight some outliers, we see that on @fig-temperature-mean that CM-07 has lower mean temperature during the detector work times and CM-01 and CM-02 have more stable temperatures as they are the only 2 locations on an island. CM-07 is located in a W-E facing valley.
+Here we'll see what the temperatures are like around the sites. The sites are arranged from north to south and on @fig-temperature-overview we can see that the mean temperatures (dark lines) are similar throughout the study area. To further highlight some outliers, we see on @fig-temperature-mean that CM-07 has lower mean temperature during the detector work times and CM-01 and CM-02 have more stable temperatures as they are the only 2 locations on an island (Utsira). CM-07 is an inland site located in a W-E facing valley.
 
-```{r temperature}
+```{r}
 #| echo: false
 #| label: fig-temperature-overview
 #| warning: false
@@ -233,7 +237,7 @@ weather_full_ns <- weather_full %>%
 
 ```
 
-```{r temperature 1}
+```{r}
 #| echo: false
 #| label: fig-temperature-mean
 #| warning: false
@@ -260,7 +264,9 @@ ggplot(temp_summary, aes(mean_temp, sd_temp, label = name)) +
 
 ```
 
-```{r temperature 2}
+Throughout the season, we can see on @fig-temperature-trend that the temperature has a sudden drop in September, after a storm hit the region. 
+
+```{r}
 #| echo: false
 #| label: fig-temperature-trend
 #| warning: false
@@ -278,7 +284,9 @@ ggplot(weather_full_ns) +
 
 ### Wind
 
-```{r wind 1}
+The Southwestern part of Norway is known as a very windy area, the maximum and mean wind speed graphs support that claim with coastal sites showing higher mean and max wind speeds.
+
+```{r}
 #| echo: false
 #| label: fig-max-wind
 #| warning: false
@@ -302,7 +310,7 @@ ggplot(weather_full_ns) +
 
 ```
 
-```{r wind 2}
+```{r}
 #| echo: false
 #| label: fig-mean-wind
 #| warning: false
@@ -325,11 +333,12 @@ wind_summary$mean_wind <- mean_wind$mean_wind[match(wind_summary$name, mean_wind
  
 ```
 
-```{r wind roses}
+When we look at the wind direction in the whole research area, we can see the difference in the summer months and autumn, as the wind changes direction towards autumn.
+
+```{r}
 #| echo: false
 #| label: fig-wind-direction
 #| warning: false
-#| include: false
 #| fig-cap: Comparison of wind direction by month
 #| fig-subcap:
 #| - "Wind direction in June-July"
@@ -364,13 +373,13 @@ wind_summary$mean_wind <- mean_wind$mean_wind[match(wind_summary$name, mean_wind
   )
   
   windRose(
-    subset(weather_full, month %in% c(9)),
+    subset(weather_full, month %in% c(9, 10)),
     ws = "wind_speed_10m",
     wd = "wind_direction_10m",
     facet = "name",
     ncol = 5
   )
-  
+
     windRose(
     subset(weather_full, month %in% c(10)),
     ws = "wind_speed_10m",
@@ -383,9 +392,15 @@ wind_summary$mean_wind <- mean_wind$mean_wind[match(wind_summary$name, mean_wind
 
 ### Precipitation
 
-```{r precipitation}
+When we look at the precipitation during the detector recording period, we can see that about 15% of the recording hours, it was raining more than 0,1 mm per hour. On @fig-precipitation-fraction we can see a difference in the southern locations and other locations in the study area, with the south (Lista peninsula) having the least amount of rainfall hours. 
+
+```{r}
 #| echo: false
+#| label: fig-precipitation-fraction
 #| warning: false
+#| fig-cap: The fraction of wet hours during the recording period in 2024
+
+
 # put a threshold for rain (dataset has a lot of minuscle values)
 
 rain_threshold <- 0.1
@@ -412,21 +427,48 @@ ggplot(rain_freq, aes(name, wet_frac)) +
   labs(y = "Fraction of wet hours (≥ 0.1 mm)") +
   theme(axis.text.x = element_text(angle = 90))
 
-ggplot(weather_full_ns) +
- aes(x = datetime, y = precipitation_amount, colour = type) +
+
+
+```
+When we look at how much it rained nightly in the study area on @fig-precipitation, then we can see some periods without rain, but also a lot of long rainy periods.
+
+
+```{r}
+#| echo: false
+#| label: fig-precipitation
+#| warning: false
+#| fig-cap: Overall rainfall in 2024
+
+weather_daily <- weather_full_ns %>%
+  mutate(date = as.Date(datetime)) %>%
+  group_by(name, date, type) %>%
+  summarise(
+    precipitation_amount = sum(precipitation_amount, na.rm = TRUE),
+    .groups = "drop"
+  )
+
+
+ggplot(weather_daily) +
+ aes(x = date, y = precipitation_amount, colour = type) +
  geom_point() +
  scale_color_hue(direction = 1) +
  labs(x = "Date", y = "Precipitation (mm)", title = "Amount of rainfall in 2024 field season", 
  color = "Category") +
  theme_bw() +
  theme(legend.text = element_text(size = 12L), legend.title = element_text(size = 12L))
+
+
 ```
 
 ### Other parameters
 
-```{r others}
+There is also data about cloud area fraction and air pressure for the study area. From total cloud coverage by study sites, on @fig-cloud we can see that northern sites seem to have more cloud coverage than the southern sites.
+
+```{r}
 #| echo: false
+#| label: fig-cloud
 #| warning: false
+#| fig-cap: Cloud coverage change in 2024
 
   
 ggplot(weather_full_ns, aes(x = name, y = cloud_area_fraction)) +
@@ -435,6 +477,18 @@ ggplot(weather_full_ns, aes(x = name, y = cloud_area_fraction)) +
   labs(x = "Site from N to S", y = "Mean cloud coverage") +
   theme(axis.text.x = element_text(angle = 90))
   
+
+
+```
+
+Air pressure change is constant in the region, with more amplitude further in the season.
+
+```{r}
+#| echo: false
+#| label: fig-air
+#| warning: false
+#| fig-cap: Air pressure change in 2024
+
 ggplot(weather_full_ns) +
  aes(x = datetime, y = air_pressure_at_sea_level) +
  geom_line(colour = "#3A69BE") +
@@ -442,4 +496,6 @@ ggplot(weather_full_ns) +
  theme_bw() +
  theme(legend.text = element_text(size = 12L), legend.title = element_text(size = 12L))
 
+
 ```
+
