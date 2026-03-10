@@ -1,7 +1,7 @@
 
 # This Rscript is made mainly to put together the data from all sites into 1 csv file
 # This script also gives a simple overview of the data.
-# Acquire cm_all_2024.csv (on Onedrive, too big to upload to Github) to use the script
+# Acquire cm_all_2024.csv (on Onedrive) to use the script
 # Last run through of script: 25/11/2025
 
 # setup -------------------------------------------------------------------
