@@ -7,5 +7,6 @@
 .quarto
 cm_all.csv
 cm_all_2024.csv
+data/
 
 /.quarto/
