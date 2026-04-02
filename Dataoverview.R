@@ -1,8 +1,7 @@
 
 # This Rscript is made mainly to put together the data from all sites into 1 csv file
 # This script also gives a simple overview of the data.
-# Acquire cm_all_2024.csv (on Onedrive) to use the script
-# Last run through of script: 25/11/2025
+
 
 # setup -------------------------------------------------------------------
 # libraries used in this project
@@ -31,8 +30,9 @@ overview_data <-  read_csv("data/overview_table.csv")
 coordinates <- read_csv("data/GPS_2024.csv")
 water <- read_csv("data/distance_from_water_2024.csv")
 
+# Everything made for the old run of merging data, before v2-----------------------------------------
 
-# Make directories of all the sites and the id files (takes a long time) -----------
+## Make directories of all the sites and the id files (takes a long time) -----------
 
   # Define the source and destination directories # computer shut down randomly, real codechunck did not survive
 source_dir <- "P:/SW_CoastalMonitoring/Data_collection_2024"
@@ -69,7 +69,7 @@ print("Merging complete!")
 
 
 
-# Correcting a mistake made before ----------------------------------------------------------
+## Correcting a mistake made before ----------------------------------------------------------
 
 # df <- list.files(path='data/IDfiles/CM-11', full.names = TRUE) %>% 
 #   lapply(read_csv) %>% 
@@ -101,7 +101,7 @@ print("Merging complete!")
 # print("Merging complete!")
 
 
-# read in all the data from 50 directories  --------------------------------------------------------------
+## read in all the data from 50 directories  --------------------------------------------------------------
 
 site_folders <- list.dirs("data/IDfiles", recursive = FALSE)
 idfiles_dir <- "data/IDfiles"
@@ -133,7 +133,7 @@ for (site in site_folders) {
 }
 
 
-# how many rows of data do I have?  ------------------------------------------------------------
+## how many rows of data do I have?  ------------------------------------------------------------
 
   # List all site names
 site_names <- sprintf("inputCM%02d", 1:50)
@@ -192,38 +192,32 @@ dim(cm)  # Should return (3503006 this is 3773 rows more than I got with a datas
 #run on 05.03 3499233
 head(cm)
 
+
+# After v2 of making the combined file---------------------------------
+
+cm <- read.csv("cm_all_2024_v2.csv")
+
   #choose variables for dataset
 cm <- cm %>% 
   rename(
-    filename = "OUT FILE FS",
-    autoid = "AUTO ID*",
-    DATE.12 = 'DATE-12',
-    HOUR.12 = 'HOUR-12',
-    TIME.12 = 'TIME-12',
-    IN_FILE = "IN FILE", 
-    MATCH_RATIO = "MATCH RATIO") %>% 
+    filename = "OUT.FILE.FS",
+    autoid = "AUTO.ID.") %>% 
   mutate(autoid = factor(autoid)) %>% 
-  dplyr::select(OUTDIR, FOLDER, IN_FILE, filename, DURATION, 
+  dplyr::select(OUTDIR, FOLDER, IN.FILE, filename, DURATION, 
                 DATE, TIME, HOUR,
                 DATE.12, TIME.12, HOUR.12,
-                autoid, PULSES, MATCH_RATIO, Site
+                autoid, PULSES, MATCH.RATIO, ALTERNATE.1, Site
   )
-
-  # remove tests, by location: date deployed and date retrieved
-
-cm <- cm %>% 
-  filter(DATE >= as.POSIXct("2024-06-14"))
+  # Date and Date.12 as date format
 
 cm <- cm %>% 
-  mutate(DATE = replace(DATE, Site == "CM-39" & DATE > as.POSIXct("2024-10-10"), NA_POSIXct_)) %>% 
-  filter(!is.na(DATE))
-
-  # write working csv
-write.csv(cm, "cm_all_2024.csv")
+  mutate(
+    DATE = as.Date(DATE),
+    DATE.12 = as.Date(DATE.12))
 
   # read csv in
 
-cm <- read.csv("cm_all_2024.csv")
+cm <- read.csv("cm_all_2024_v2.csv")
 
 
 
@@ -302,12 +296,14 @@ overview_summary <- overview_summary %>%
     by= "Site"
   )
 
+
+
 overview_summary <- overview_summary %>%
   left_join(
     coordinates %>%
       select(Site,
-             latitude = Latitude,
-             longitude = Longitude),
+             latitude = Y,
+             longitude = X),
     by= "Site"
   )
 

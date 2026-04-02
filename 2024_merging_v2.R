@@ -142,6 +142,59 @@ colSums(is.na(cm))
 str(cm) 
 summary(cm) 
 
+# years in 2020, change to right year
+
+cm <- cm %>%
+  mutate(DATE = make_date(
+    year = 2024,
+    month = month(DATE),
+    day = day(DATE)
+  ))
+
+# remove tests, by location: date deployed and date retrieved
+
+cm <- cm %>% 
+  filter(DATE >= as.Date("2024-06-14"))
+
+cm <- cm %>% 
+  mutate(DATE = replace(DATE, Site == "CM-39" & DATE > as.POSIXct("2024-10-10"), NA_POSIXct_)) %>% 
+  filter(!is.na(DATE))
+
+# first time did not take CM-04 25.07 in
+
+df04 <- "P:/SW_CoastalMonitoring/Data_collection_2024/CM-04/WAV/KPRO_V1_25.07.2024_CM-04/id.csv" |>
+  lapply(function(f) {
+    read_csv(f, col_types = cols(DATE = col_character(),`DATE-12` = col_character())) |>
+      mutate(Site = "CM-34")
+  }) |>
+  bind_rows()
+
+df04$DATE = as.Date(df04$DATE, format = "%d/%m/%y")
+df04$`DATE-12` = as.Date(df04$`DATE-12`, format = "%d/%m/%y")
+
+colSums(is.na(df04))
+
+# df04 <- df04 %>% 
+#   rename(
+#     OUT.FILE.FS = "OUT FILE FS",
+#     IN.FILE = "IN FILE",
+#     OUT.FILE.ZC = "OUT FILE ZC",
+#     DATE.12 = "DATE-12",
+#     TIME.12 = "TIME-12",
+#     HOUR.12 = "HOUR-12",
+#     AUTO.ID. = "AUTO ID*",
+#     ALTERNATE.1 = "ALTERNATE 1",
+#     MATCH.RATIO = "MATCH RATIO",
+#     ALTERNATE.2 = "ALTERNATE 2",
+#     MANUAL.ID = "MANUAL ID",
+#     REVIEW.ORGID = "REVIEW ORGID",
+#     REVIEW.USERID = "REVIEW USERID") 
+
+cm <- rbind(cm, df04)
+
 # write working csv-------------------------------
 write.csv(cm, "cm_all_2024_v2.csv")
+
+
+# cm <- read.csv("cm_all_2024_v2.csv")
 
