@@ -192,6 +192,7 @@ dim(cm)  # Should return (3503006 this is 3773 rows more than I got with a datas
 #run on 05.03 3499233
 head(cm)
 
+write.csv(cm, "cm_all_2024_v2.csv")
 
 # After v2 of making the combined file---------------------------------
 
@@ -214,12 +215,6 @@ cm <- cm %>%
   mutate(
     DATE = as.Date(DATE),
     DATE.12 = as.Date(DATE.12))
-
-  # read csv in
-
-cm <- read.csv("cm_all_2024_v2.csv")
-
-
 
 # Make overview table for the year, mostly based on the 2024 all data combined folder.  --------
   #CM-34 was lakesite, changing that in the dataframe
@@ -410,9 +405,9 @@ overview_summary <- overview_summary %>%
 
 # some types still wrong
 
-overview_summary[1,14] = "inland" 
-overview_summary[31,14] = "coast" 
-overview_summary[40,14] = "coast" 
+overview_summary[1,13] = "inland" 
+overview_summary[31,13] = "coast" 
+overview_summary[40,13] = "coast" 
 
 #final product 
 

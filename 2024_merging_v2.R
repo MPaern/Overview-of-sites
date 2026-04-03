@@ -142,15 +142,6 @@ colSums(is.na(cm))
 str(cm) 
 summary(cm) 
 
-# years in 2020, change to right year
-
-cm <- cm %>%
-  mutate(DATE = make_date(
-    year = 2024,
-    month = month(DATE),
-    day = day(DATE)
-  ))
-
 # remove tests, by location: date deployed and date retrieved
 
 cm <- cm %>% 
@@ -165,7 +156,7 @@ cm <- cm %>%
 df04 <- "P:/SW_CoastalMonitoring/Data_collection_2024/CM-04/WAV/KPRO_V1_25.07.2024_CM-04/id.csv" |>
   lapply(function(f) {
     read_csv(f, col_types = cols(DATE = col_character(),`DATE-12` = col_character())) |>
-      mutate(Site = "CM-34")
+      mutate(Site = "CM-04")
   }) |>
   bind_rows()
 
@@ -190,11 +181,26 @@ colSums(is.na(df04))
 #     REVIEW.ORGID = "REVIEW ORGID",
 #     REVIEW.USERID = "REVIEW USERID") 
 
+# years in 2020, change to right year
+
+cm <- cm %>%
+  mutate(DATE = make_date(
+    year = 2024,
+    month = month(DATE),
+    day = day(DATE)
+  ))
+
+cm <- cm %>%
+  mutate(`DATE-12` = make_date(
+    year = 2024,
+    month = month(`DATE-12`),
+    day = day(`DATE-12`)
+  ))
+
 cm <- rbind(cm, df04)
 
 # write working csv-------------------------------
 write.csv(cm, "cm_all_2024_v2.csv")
 
 
-# cm <- read.csv("cm_all_2024_v2.csv")
-
+#new <- read.csv("cm_all_2024_v2.csv")
