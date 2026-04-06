@@ -417,6 +417,7 @@ overview_summary <- read.csv("overview_2024.csv")
 
 #write.csv(missing_dates, "Missing dates v5.csv")
 
+write.csv(missing_dates, "missing dates v2.csv")
 
 # daytime noise -----------------------------------------------------------
 # make new df with sunrise and sunset times 
