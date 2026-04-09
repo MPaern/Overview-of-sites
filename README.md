@@ -2,6 +2,7 @@
 Code to summarize acoustic data from 50 locations for 2024.
 
 Newest version of 2024 full dataset (cm_all_2024_v2.csv) put together with 2024_merging_v2.R. File cm_all_2024_v2 not fixed for duplicates, but cm_2024 fixed and contains no duplicates. Files both in OneDrive with NoBats_2024 that contains the dates detectors were active but no noise or bats were detected (Date.12).
+cm_2024 is a smaller outtake of the data, containing hopefully everything needed from Kaleidoscope output for the analysis stage.
 
 Code started years ago, many parts in different files. 
 Overview graphs on github page from overview_of_data_2024.qmd.
