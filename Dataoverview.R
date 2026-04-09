@@ -609,3 +609,95 @@ ggplot(daytimebats4) +
 # esquisser()
 
 
+# make files coherent-----------------------
+
+cm <- read.csv("cm_all_2024_v2.csv")
+overview_summary <- read.csv("overview_2024.csv")
+
+cm <- cm %>% 
+  rename(
+    filename = "OUT.FILE.FS",
+    autoid = "AUTO.ID.") %>% 
+  mutate(autoid = factor(autoid)) %>% 
+  dplyr::select(OUTDIR, FOLDER, IN.FILE, filename, DURATION, 
+                DATE, TIME, HOUR,
+                DATE.12, TIME.12, HOUR.12,
+                autoid, PULSES, MATCH.RATIO, ALTERNATE.1, Site
+  )
+# Date and Date.12 as date format
+
+cm <- cm %>% 
+  mutate(
+    DATE = as.Date(DATE),
+    DATE.12 = as.Date(DATE.12))
+
+str(cm) 
+colSums(is.na(cm))
+
+cm <- cm %>% 
+  mutate(filename = coalesce(filename, IN.FILE))
+
+# duplicates
+
+n_occur <- data.frame(table(cm_1$filename))
+n_occur[n_occur$Freq > 1,]
+n_occur_2_2 <- cm[cm$filename %in% n_occur$Var1[n_occur$Freq == 2],]
+
+# rename the ones with "Noise", add "_n"
+
+cm_1 <- cm %>%
+  group_by(filename) %>%
+  mutate(filename = ifelse(n() > 1 & autoid == "Noise",
+                           paste0(filename, "_n"),
+                           filename)) %>%
+  ungroup()
+
+str(cm_1) 
+colSums(is.na(cm_1))
+
+# remove duplicates
+
+cm_1 <- cm_1[!duplicated(cm_1),]
+
+# see what's left
+
+n_occur <- data.frame(table(cm_1$filename))
+n_occur[n_occur$Freq > 1,]
+n_occur_2_2 <- cm[cm$filename %in% n_occur$Var1[n_occur$Freq == 2],]
+
+# there was a weird file with some extra files in CM-15 and CM-16, but these files are duplicated with Data folder, keep the ones in Data folder
+
+cm_1 <- cm_1 %>%
+  group_by(filename) %>%
+  filter(!(n() > 1 & FOLDER != "Data")) %>%
+  ungroup()
+
+# check for duplicates
+
+any(duplicated(cm_1$filename))
+
+str(cm_1) 
+colSums(is.na(cm_1))
+
+# write new version
+
+write.csv(cm_1, "cm_2024.csv")
+
+# make a file with dates with no bats based on missing_dates, "missing dates v2.csv"
+
+missing_2024 <- read.csv("2024_missing_vetted.csv")
+
+missing_2024 <- missing_2024 %>%
+  mutate(ExpectedDate=dmy(ExpectedDate))
+
+NoData <-  missing_2024 |> 
+  filter(Battery.status == "OK", SD.card.status == "OK") |> 
+  select(Site, ExpectedDate) |> 
+  rename(
+    Date = ExpectedDate
+  ) |> 
+  data.frame(Type = "NoData")
+
+# write new file
+
+write.csv(NoData, "NoBats_2024.csv")
