@@ -1,7 +1,7 @@
 
 Code to summarize acoustic data from 50 locations for 2024.
 
-Newest version of 2024 data made with 2024_merging_v2.R. NOISE folder was made separately on this year and this accounts for many duplicates in names. 
+Newest version of 2024 data made with 2024_merging_v2.R. File cm_all_2024_v2 not fixed for duplicates, but cm_2024 fixed. Files in OneDrive.
 
 Overview graphs on github page from overview_of_data_2024.qmd
 
