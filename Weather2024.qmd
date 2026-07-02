@@ -102,10 +102,43 @@ suntimes_site$site <- overview_summary$Site [
 
 # Make hourly list of times by site that detectors were active in UTC  
 
-# compare hours to the weather data: 1) note if there are weather hours missing that are in the sunrise-sunset hour list 
-                                    #2) make df with only the weather hours that I'm going to use the data from (aka sunrise + 1 hour and sunset - 1 hour weather data?)
-                                    
-# look what hours I actually have from data and which nights are full/ what is missing
+cm <- read.csv("cm_2024.csv")
+cm[1]<- NULL
+# cm[nchar(cm$datetime) < 19, ]
+cm$datetime <- as.POSIXct(cm$datetime)
+
+# datetime lenght 10 needs time 00:00:00
+
+cm$datetime <- ymd_hms(
+  ifelse(nchar(cm$datetime) == 10,
+         paste0(cm$datetime, " 00:00:00"),
+         cm$datetime)
+)
+
+
+# compare hours to the weather data
+# Fix timezone
+# then convert to true UTC to match weather
+cm_times <- cm |>
+  mutate(
+    dt_utc = with_tz(force_tz(datetime, "Europe/Oslo"), "UTC"),
+    year  = year(dt_utc),
+    month = month(dt_utc),
+    day   = day(dt_utc),
+    hour  = hour(dt_utc)
+  )
+
+
+# Find cm rows with no matching weather record
+missing <- cm_times |>
+  anti_join(weather, by = c("Site" = "name", "year", "month", "day", "hour"))
+
+nrow(missing)       # how many cm rows lack weather
+missing |> count(Site)  # broken down by site
+
+# there are some hours missing for the data, but not between sunset-sunrise  
+# will fix the data by downloading more weather data 
+
 
 ```
 
@@ -264,7 +297,7 @@ ggplot(temp_summary, aes(mean_temp, sd_temp, label = name)) +
 
 ```
 
-Throughout the season, we can see on @fig-temperature-trend that the temperature has a sudden drop in September, after a storm hit the region. 
+Throughout the season, we can see on @fig-temperature-trend that the temperature has a sudden drop in September, after a storm hit the region.
 
 ```{r}
 #| echo: false
@@ -392,7 +425,7 @@ When we look at the wind direction in the whole research area, we can see the di
 
 ### Precipitation
 
-When we look at the precipitation during the detector recording period, we can see that about 15% of the recording hours, it was raining more than 0,1 mm per hour. On @fig-precipitation-fraction we can see a difference in the southern locations and other locations in the study area, with the south (Lista peninsula) having the least amount of rainfall hours. 
+When we look at the precipitation during the detector recording period, we can see that about 15% of the recording hours, it was raining more than 0,1 mm per hour. On @fig-precipitation-fraction we can see a difference in the southern locations and other locations in the study area, with the south (Lista peninsula) having the least amount of rainfall hours.
 
 ```{r}
 #| echo: false
@@ -430,8 +463,8 @@ ggplot(rain_freq, aes(name, wet_frac)) +
 
 
 ```
-When we look at how much it rained nightly in the study area on @fig-precipitation, then we can see some periods without rain, but also a lot of long rainy periods.
 
+When we look at how much it rained nightly in the study area on @fig-precipitation, then we can see some periods without rain, but also a lot of long rainy periods.
 
 ```{r}
 #| echo: false
@@ -498,4 +531,3 @@ ggplot(weather_full_ns) +
 
 
 ```
-
