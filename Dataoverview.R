@@ -701,3 +701,42 @@ NoData <-  missing_2024 |>
 # write new file
 
 write.csv(NoData, "NoBats_2024.csv")
+
+# fix time in big file 
+
+cm <- read.csv("cm_2024.csv")
+cm[1] <- NULL
+
+cm <- cm %>%
+  mutate(DATE.12=ymd(DATE.12)) |>
+  mutate(DATE=ymd(DATE))
+
+cm <- cm %>%
+  mutate(
+    TIME = ifelse(
+      grepl("^\\d+$", TIME),
+      format(as.POSIXct(as.numeric(TIME), origin = "1970-01-01", tz = "CEST"), "%H:%M:%S"),
+      TIME
+    )
+  )
+
+cm <- cm %>%
+  mutate(TIME = as_hms(TIME))
+
+cm <- cm %>%
+  mutate(
+    TIME.12 = ifelse(
+      grepl("^\\d+$", TIME.12),
+      format(as.POSIXct(as.numeric(TIME.12), origin = "1970-01-01", tz = "CEST"), "%H:%M:%S"),
+      TIME.12
+    )
+  )
+
+cm <- cm %>%
+  mutate(TIME.12 = as_hms(TIME.12))
+
+# write new version with times
+
+write.csv(cm, "cm_2024.csv")
+
+
