@@ -414,13 +414,118 @@ write.csv(weather_full_1, "WeatherData2024night.csv")
 
 # Make dataset with +-1h data and daytime data only-------------------------------------
 
+cm <- read.csv("cm_2024.csv")
+overview_summary <- read.csv("overview_2024.csv")
+
+cm[1] <- NULL
+overview_summary[1] <- NULL
+
+str(cm)
+
+# change all dates to date format and all times to time format, some times are read in incorrectly, fix that
 
 
+convert_time <- function(x) {
+  is_numeric <- grepl("^\\d+$", x) & !is.na(x)
+  
+  seconds <- as.numeric(x[is_numeric]) %% 86400
+  
+  x[is_numeric] <- sprintf(
+    "%02d:%02d:%02d",
+    seconds %/% 3600,
+    (seconds %% 3600) %/% 60,
+    seconds %% 60
+  )
+  
+  readr::parse_time(x, format = "%H:%M:%S")
+}
 
+cm <- cm %>%
+  mutate(
+    DATE = ymd(DATE),
+    DATE.12 = ymd(DATE.12),
+    TIME = convert_time(TIME),
+    TIME.12 = convert_time(TIME.12)
+  )
 
+#write.csv(cm, "cm_2024.csv")
 
+cm <- cm %>%
+  mutate(
+    datetime = as.POSIXct(
+      paste(DATE, TIME),
+      format = "%Y-%m-%d %H:%M:%S",
+      tz = "Europe/Oslo"
+    ),
+    datetime.12 = as.POSIXct(
+      paste(DATE.12, TIME.12),
+      format = "%Y-%m-%d %H:%M:%S",
+      tz = "Europe/Oslo"
+    )
+  )
 
+# get sunset and sunrise times
 
+sun_input <- cm %>%
+  distinct(Site, date = DATE) %>%
+  left_join(
+    overview_summary %>% select(Site, latitude, longitude),
+    by = "Site"
+  )
 
+sun_times <- bind_cols(
+  sun_input %>% select(Site, DATE = date),
+  suncalc::getSunlightTimes(
+    data = sun_input %>%
+      transmute(date = date, lat = latitude, lon = longitude),
+    keep = c("sunrise", "sunset"),
+    tz = "Europe/Oslo"
+  ) %>%
+    select(sunrise, sunset)
+)
 
+cm_sun <- cm %>%
+  left_join(sun_times, by = c("Site", "DATE"))
 
+# daytime bats 
+
+cm_daytime <- cm_sun %>%
+  filter(
+    !is.na(sunrise), !is.na(sunset),
+    datetime >= sunrise,
+    datetime <= sunset
+  )
+
+# dataset with +-1h 
+
+night_windows <- sun_times %>%
+  arrange(Site, DATE) %>%
+  group_by(Site) %>%
+  mutate(
+    next_sunrise = lead(sunrise)
+  ) %>%
+  ungroup() %>%
+  filter(
+    !is.na(sunset),
+    !is.na(next_sunrise)
+  ) %>%
+  transmute(
+    Site,
+    night_start = sunset - 3600,
+    night_end = next_sunrise + 3600
+  )
+
+cm_night <- cm %>%
+  inner_join(
+    night_windows,
+    by = "Site",
+    relationship = "many-to-many"
+  ) %>%
+  filter(
+    datetime >= night_start,
+    datetime <= night_end
+  ) %>%
+  select(-night_start, -night_end)
+
+write.csv(cm_daytime, "cm_2024_day.csv")
+write.csv(cm_night, "cm_2024_night.csv")
