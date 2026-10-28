@@ -11,6 +11,7 @@
 # Make a dataset with 1 h before and 1 h after data
 # Make dataset with daytime data (between sunrise and sunset)
 
+# 2024--------------------------
 # read data in ---------------
 
 library(tidyverse)
@@ -529,3 +530,4 @@ cm_night <- cm %>%
 
 write.csv(cm_daytime, "cm_2024_day.csv")
 write.csv(cm_night, "cm_2024_night.csv")
+
