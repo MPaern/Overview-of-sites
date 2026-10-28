@@ -240,6 +240,14 @@ missing |> count(Site)  # broken down by site
   
   weather_full$type <- overview_summary$type[match(weather_full$name, overview_summary$Site)]
   
+  # change CM-01 to coast
+  
+  weather_full <- weather_full %>%
+   mutate(type = if_else(name == "CM-01" & type == "inland", "coast", type))
+  
+  # write new file
+  
+  write.csv(weather_full, "WeatherData2024.csv")
   
   # --------check if all necessary timepoints are present based on cm_all. This dataset is still in UTC, should I have the other one also in UTC or change this into UTC+2??---
 
