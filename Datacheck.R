@@ -8,7 +8,7 @@
 # Do you have all the dates/times
 # Are the missing dates = dates that the detector was on, other days are missing because the detector was off.
 # Find mistakes in autoid
-# Make a dataset with 30 min before and 30 min after data
+# Make a dataset with 1 h before and 1 h after data
 # Make dataset with daytime data (between sunrise and sunset)
 
 # read data in ---------------
@@ -131,16 +131,31 @@ df_v3 <- df_v3 %>%
     OUT.FILE.FS = sub("_n[0-9]+\\.wav$", ".wav", OUT.FILE.FS)
   )
 
-write.csv(df_v3, "cm_all_2024_v2.csv")
+write.csv(df_v1, "cm_all_2024_v2.csv")
+
+# new overview file too
+
+cm_v1 <- df_v1 %>% 
+  rename(
+    filename = "OUT.FILE.FS",
+    autoid = "AUTO.ID.") %>% 
+  mutate(autoid = factor(autoid)) %>% 
+  dplyr::select(INDIR, OUTDIR, FOLDER, IN.FILE, filename, DURATION, 
+                DATE, TIME, HOUR,
+                DATE.12, TIME.12, HOUR.12,
+                autoid, PULSES, MATCHING, MATCH.RATIO, ALTERNATE.1, ALTERNATE.2 , Site
+  )
+
+write.csv(cm_v1, "cm_2024.csv")
 
 # check if small cm is the same, make new smaller dataset and work with that.
 
 cm <- read.csv("cm_2024.csv")
 
 extra_in_cm <- cm %>%
-  anti_join(df_v3, by = c("filename" = "OUT.FILE.FS"))
+  anti_join(df_v1, by = c("filename" = "OUT.FILE.FS"))
 
-extra_in_df_v3 <- df_v3 %>%
+extra_in_df_v1 <- df_v1 %>%
   anti_join(cm, by = c("OUT.FILE.FS" = "filename"))
 
 # weather data check 5h before sunset and 1h after sunrise--------------------
@@ -160,40 +175,252 @@ summary(weather)
 
 # look if I have full weather data from 2024 and delete unnecessary ones making a complete data set. 
 
-cm <- read.csv("cm_2025.csv")
 cm[1]<- NULL
-# cm[nchar(cm$datetime) < 19, ]
-cm$datetime <- as.POSIXct(cm$datetime)
 
-# datetime lenght 10 needs time 00:00:00
+# do I need to make datetime column?
+# # cm[nchar(cm$datetime) < 19, ]
+# cm$datetime <- as.POSIXct(cm$datetime)
+# 
+# # datetime lenght 10 needs time 00:00:00
+# 
+# cm$datetime <- ymd_hms(
+#   ifelse(nchar(cm$datetime) == 10,
+#          paste0(cm$datetime, " 00:00:00"),
+#          cm$datetime)
+# )
 
-cm$datetime <- ymd_hms(
-  ifelse(nchar(cm$datetime) == 10,
-         paste0(cm$datetime, " 00:00:00"),
-         cm$datetime)
-)
+# make hour list of hours the detector was working- 1h after sunrise and 5h before sunset
 
-
-# compare hours to the weather data
-# Fix timezone
-# then convert to true UTC to match weather
-cm_times <- cm |>
+overview_summary <- overview_summary %>%
   mutate(
-    dt_utc = with_tz(force_tz(datetime, "Europe/Oslo"), "UTC"),
-    year  = year(dt_utc),
-    month = month(dt_utc),
-    day   = day(dt_utc),
-    hour  = hour(dt_utc)
+    earliest_active = as.Date(earliest_active),
+    last_active     = as.Date(last_active)
   )
 
+# make dates for each site
+dates_working <- overview_summary %>%
+  rowwise() %>%
+  mutate(date = list(seq(
+    earliest_active,
+    last_active,
+    by = "day"
+  ))) %>%
+  ungroup() %>%
+  unnest(date)
 
-# Find cm rows with no matching weather record
+# sunrise and sunset
+sun_dates <- bind_rows(
+  dates_working,
+  dates_working %>% mutate(date = date + 1)
+) %>%
+  distinct(Site, date, .keep_all = TRUE) %>%
+  mutate(sun_id = row_number())
+
+# sunrise and sunset in UTC
+sun_times <- bind_cols(
+  sun_dates,
+  suncalc::getSunlightTimes(
+    data = sun_dates %>%
+      transmute(date, lat = latitude, lon = longitude),
+    keep = c("sunrise", "sunset"),
+    tz = "UTC"
+  ) %>%
+    select(sunrise, sunset)
+)
+
+# sunset on the current date and sunrise on the next date
+daily_windows <- sun_dates %>%
+  select(Site, date) %>%
+  left_join(
+    sun_times %>% select(Site, date, sunset),
+    by = c("Site", "date")
+  ) %>%
+  left_join(
+    sun_times %>%
+      transmute(Site, date = date - 1, sunrise),
+    by = c("Site", "date")
+  ) %>%
+  mutate(
+    recording_start = sunset - hours(5),
+    recording_end = sunrise + hours(1)
+  )
+
+# individual UTC hours
+expected_hours <- daily_windows %>%
+  filter(
+    !is.na(recording_start),
+    !is.na(recording_end),
+    recording_end > recording_start
+  ) %>%
+  rowwise() %>%
+  mutate(
+    datetime_utc = list(seq(
+      floor_date(recording_start, unit = "hour"),
+      floor_date(recording_end - seconds(1), unit = "hour"),
+      by = "hour"
+    ))
+  ) %>%
+  ungroup() %>%
+  unnest(datetime_utc) %>%
+  mutate(
+    date_utc = as.Date(datetime_utc, tz = "UTC"),
+    hour_utc = hour(datetime_utc)
+  ) %>%
+  select(
+    Site, date, datetime_utc, date_utc, hour_utc,
+    recording_start, recording_end
+  ) %>%
+  arrange(Site, datetime_utc)
+
+# compare hours to the weather data
+# rename name to Site
+
+weather <- weather %>%
+  rename(
+    Site = name)
+
+# create date column
+
+weather <- weather %>%
+  mutate(date = make_date(
+    year = year,  
+    month = month,
+    day = day
+  ))
+
+
+observed_hours <- weather %>%
+  transmute(
+    Site,
+    date_utc = as.Date(date),
+    hour_utc = as.integer(hour)
+  ) %>%
+  distinct()
+
+# Expected hours with no corresponding observed data
+missing_hours <- expected_hours %>%
+  anti_join(
+    observed_hours,
+    by = c("Site", "date_utc", "hour_utc")
+  )
+
+# Observed hours outside the expected recording windows
+extra_hours <- observed_hours %>%
+  anti_join(
+    expected_hours %>%
+      distinct(Site, date_utc, hour_utc),
+    by = c("Site", "date_utc", "hour_utc")
+  )
+
 missing <- cm_times |>
   anti_join(weather, by = c("Site" = "name", "year", "month", "day", "hour"))
 
-nrow(missing)       # how many cm rows lack weather
-missing |> count(Site)  # broken down by site
+# calculate completeness
 
-# there are some hours missing for the data, but not between sunset-sunrise  
-# will fix the data by downloading more weather data 
+weather_completeness <- expected_hours %>%
+  distinct(Site, date_utc, hour_utc) %>%
+  left_join(
+    observed_hours %>% mutate(found = TRUE),
+    by = c("Site", "date_utc", "hour_utc")
+  ) %>%
+  group_by(Site) %>%
+  summarise(
+    expected_hours = n(),
+    observed_hours = sum(!is.na(found)),
+    missing_hours = sum(is.na(found)),
+    completeness_pct = round(
+      100 * observed_hours / expected_hours, 2
+    ),
+    .groups = "drop"
+  )
+
+# from 1h before and 1h after: 
+
+# sunset on the current date and sunrise on the next date
+daily_windows_1 <- sun_dates %>%
+  select(Site, date) %>%
+  left_join(
+    sun_times %>% select(Site, date, sunset),
+    by = c("Site", "date")
+  ) %>%
+  left_join(
+    sun_times %>%
+      transmute(Site, date = date - 1, sunrise),
+    by = c("Site", "date")
+  ) %>%
+  mutate(
+    recording_start = sunset - hours(1),
+    recording_end = sunrise + hours(1)
+  )
+
+expected_hours_1 <- daily_windows_1 %>%
+  filter(
+    !is.na(recording_start),
+    !is.na(recording_end),
+    recording_end > recording_start
+  ) %>%
+  rowwise() %>%
+  mutate(
+    datetime_utc = list(seq(
+      floor_date(recording_start, unit = "hour"),
+      floor_date(recording_end - seconds(1), unit = "hour"),
+      by = "hour"
+    ))
+  ) %>%
+  ungroup() %>%
+  unnest(datetime_utc) %>%
+  mutate(
+    date_utc = as.Date(datetime_utc, tz = "UTC"),
+    hour_utc = hour(datetime_utc)
+  ) %>%
+  select(
+    Site, date, datetime_utc, date_utc, hour_utc,
+    recording_start, recording_end
+  ) %>%
+  arrange(Site, datetime_utc)
+
+weather_completeness_1 <- expected_hours_1 %>%
+  distinct(Site, date_utc, hour_utc) %>%
+  left_join(
+    observed_hours %>% mutate(found = TRUE),
+    by = c("Site", "date_utc", "hour_utc")
+  ) %>%
+  group_by(Site) %>%
+  summarise(
+    expected_hours = n(),
+    observed_hours = sum(!is.na(found)),
+    missing_hours = sum(is.na(found)),
+    completeness_pct = round(
+      100 * observed_hours / expected_hours, 2
+    ),
+    .groups = "drop"
+  )
+
+missing_hours_1 <- expected_hours_1 %>%
+  anti_join(
+    observed_hours,
+    by = c("Site", "date_utc", "hour_utc")
+  )
+
+# make dataset with +-1h for weather
+
+weather_full_1 <- weather_full %>%
+  inner_join(
+    expected_hours_1,
+    by = c("name" = "Site", "datetime" = "datetime_utc")
+  )
+
+write.csv(weather_full_1, "WeatherData2024night.csv")
+
+# Make dataset with +-1h data and daytime data only-------------------------------------
+
+
+
+
+
+
+
+
+
+
 
