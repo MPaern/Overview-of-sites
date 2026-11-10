@@ -531,3 +531,73 @@ cm_night <- cm %>%
 write.csv(cm_daytime, "cm_2024_day.csv")
 write.csv(cm_night, "cm_2024_night.csv")
 
+# second try at nightly data 10.11.26
+
+cm <- read.csv("cm_all_2024_v2.csv")
+cm24 <- read.csv("cm_2024_night.csv")
+ov24 <- read.csv("overview_2024.csv")
+df <- cm # make df copy
+
+cm$DATE <- as.Date(parse_date_time(
+  cm$DATE,
+  orders = c("ymd", "dmy")
+))
+summary(is.na(cm$DATE))
+cm <- cm %>%
+  mutate(
+    datetime = as.POSIXct(paste(DATE, TIME),
+                          format = "%Y-%m-%d %H:%M:%S", tz = "Europe/Oslo"))
+
+# sunset times
+
+site_coords <- ov24 %>% distinct(Site, latitude, longitude)
+
+# every date per site
+sun_grid <- cm %>%
+  group_by(Site) %>%
+  summarise(first = min(DATE) - 1, last = max(DATE) + 1, .groups = "drop") %>%
+  rowwise() %>%
+  mutate(DATE = list(seq(first, last, by = "day"))) %>%
+  ungroup() %>%
+  select(-first, -last) %>%
+  unnest(DATE) %>%
+  left_join(site_coords, by = "Site")
+
+sun <- getSunlightTimes(
+  data = sun_grid %>% transmute(date = DATE, lat = latitude, lon = longitude),
+  keep = c("sunrise", "sunset"), tz = "Europe/Oslo"
+)
+
+sun_times <- bind_cols(sun_grid %>% select(Site, DATE),
+                       sun %>% select(sunrise, sunset))
+
+# night of date d = sunset(d) - 1h  to  sunrise(d+1) + 1h
+night_windows <- sun_times %>%
+  transmute(Site, night_date = DATE, night_start = sunset - 3600) %>%
+  left_join(sun_times %>% transmute(Site, night_date = DATE - 1,
+                                    night_end = sunrise + 3600),
+            by = c("Site", "night_date")) %>%
+  filter(!is.na(night_start), !is.na(night_end))
+
+cm_night <- cm %>%
+  mutate(night_date = as.Date(datetime - 12 * 3600, tz = "Europe/Oslo")) %>%
+  inner_join(night_windows, by = c("Site", "night_date")) %>%
+  filter(datetime >= night_start, datetime <= night_end) %>%
+  select(-night_start, -night_end)
+
+nrow(cm_night) / nrow(cm)     # most of the rows for bat data
+nrow(cm_night); nrow(cm24)    # compare with your existing night file
+anyNA(sun_times$sunrise)      # FALSE; TRUE means a site is missing coordinates in ov25
+
+cm_night <- cm_night %>% 
+  rename(
+    filename = "OUT.FILE.FS",
+    autoid = "AUTO.ID.") %>% 
+  mutate(autoid = factor(autoid)) %>% 
+  dplyr::select(INDIR, OUTDIR, FOLDER, IN.FILE, filename, DURATION, 
+                DATE, TIME, HOUR,
+                DATE.12, TIME.12, HOUR.12,
+                autoid, PULSES, MATCHING, MATCH.RATIO, ALTERNATE.1, ALTERNATE.2 , Site, datetime
+  )
+
+write.csv(cm_night, "cm_2024_night.csv")
